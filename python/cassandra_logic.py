@@ -33,7 +33,6 @@ class CassandraLogic:
         cluster = Cluster([contact_point])
         self.session = cluster.connect() if create_keyspace else cluster.connect(self.keyspace)
 
-
     def connect_keyspace(self):
         """Connect the Cassandra cluster to a certain key space.
 

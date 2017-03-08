@@ -36,6 +36,8 @@
 	<button onclick="sendInsertarURL();">Insertar</button>
 	
 	<button onclick="sendBusquedaURL();">Búsqueda</button>
+
+	<button onclick="sendResetURL();">Reset</button>
 </body>
 
 <script>
@@ -47,7 +49,12 @@ function sendInsertarURL(){
 function sendBusquedaURL(){
 	var url = '/competencia/busqueda';
     window.location.href=url;
-}	
+}
+
+function sendResetURL(){
+	var url = '/competencia/reset';
+    window.location.href=url;
+}
 
 </script>
 </html>
