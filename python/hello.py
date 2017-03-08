@@ -1,6 +1,7 @@
 from cassandra_logic import CassandraLogic
-from flask import Flask, flash, redirect, render_template, request, session, abort
+from flask import Flask, render_template, request
 import time
+
 # FLASK section.
 app = Flask(__name__)
 
@@ -14,12 +15,15 @@ def index():
 def initial_page():
     return render_template('inicio.html', **locals())
 
+
 @app.route("/competencia/insertar", methods=['GET'])
 def insertar():
     return render_template('insertar.html', **locals())
 
+
 @app.route("/competencia/cassandra", methods=['GET'])
 def cassandra():
+    # Requesting POST parameters.
     pais = request.args.get('pais')
     codigo_postal = request.args.get('codigoPostal')
     pais_destino = request.args.get('paisDestino')
@@ -44,17 +48,21 @@ def cassandra():
     # Create and drop the table. Comment if you do not want to reset the table.
     # cassandra.drop_and_create_table('precios')
 
-    column_names = ["pais", "codigo_postal", "pais_destino", "competidor", "divisa", "importe", "modo_entrega",
+    # Column names to insert.
+    # TODO: just include not empty columns.
+    column_names = ["competidor", "codigo_postal", "pais_destino", "pais", "divisa", "importe", "modo_entrega",
                     "canal_captacion", "user", "timestamp", "comision", "tasa_cambio"]
 
-    column_values = [pais, codigo_postal, pais_destino, competidor, divisa, importe, modo_entrega,
+    # Column values to insert.
+    # TODO: just include not empty columns.
+    column_values = [competidor, codigo_postal, pais_destino, pais, divisa, importe, modo_entrega,
                      canal_captacion, usuario, timestamp, comision, tasa_cambio]
+    # Convert from unicode to string.
     column_values = [str(v) for v in column_values]
 
-    print(column_values)
+    # Insert data in table.
     cassandra.insert_data('precios', column_names, column_values)
     return render_template('cassandra.html', **locals())
-
 
 
 if __name__ == "__main__":
