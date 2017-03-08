@@ -21,6 +21,17 @@ def insertar():
     return render_template('insertar.html', **locals())
 
 
+@app.route("/competencia/busqueda", methods=['GET'])
+def busqueda():
+    # Creating a Cassandra Logic object.
+    cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
+
+    # Connect to the key space.
+    cassandra = cassandra_init.connect_keyspace()
+
+    rows = cassandra.select_all('precios')
+    return render_template('busqueda.html', **locals())
+
 @app.route("/competencia/reset", methods=['GET'])
 def reset():
     # Creating a Cassandra Logic object.

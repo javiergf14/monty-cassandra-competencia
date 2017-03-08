@@ -128,3 +128,21 @@ class CassandraLogic:
         insert_data_query += ");"
 
         self.session.execute(insert_data_query)
+
+    def select_all(self, table_name):
+        """Select all the information of a table
+
+           Args:
+               table_name (str): name of the table.
+
+            Returns:
+                All the rows of the table.
+        """
+        results = self.session.execute("SELECT * FROM {}".format(table_name))
+        rows = []
+        for res in results:
+            row = []
+            for r in res:
+                row.append(str(r))
+            rows.append(row)
+        return rows
