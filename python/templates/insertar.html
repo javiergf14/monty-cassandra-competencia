@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Precios competencia</title>
+	
+	<style>
+	html,body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+	
+	#map {
+		height: 100%;
+	}
+	
+	#floating-panel {
+		position: absolute;
+		top: 10px;
+		left: 25%;
+		z-index: 5;
+		background-color: #fff;
+		padding: 5px;
+		border: 1px solid #999;
+		text-align: center;
+		font-family: 'Roboto', 'sans-serif';
+		line-height: 30px;
+		padding-left: 10px;
+	}
+	</style>
+</head>
+
+<body>
+	Introduzca los campos a insertar en Cassandra (por ahora hay que escribirlos, pr?ximo update se podr?n seleccionar algunos):
+	<br> 
+	<br>
+	
+	Pais: <input type="text" name="Pais" id="Pais"><br>
+	Codigo postal: <input type="text" name="CodigoPostal" id="CodigoPostal"><br>
+	Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
+	Competidor: <input type="text" name="Competidor" id="Competidor"><br>
+	Divisa: <input type="text" name="Divisa" id="Divisa"><br>
+	Importe: <input type="text" name="Importe" id="Importe"><br>
+	Modo Entrega: <input type="text" name="ModoEntrega" id="ModoEntrega"><br>
+	Canal Captacion: <input type="text" name="CanalCaptacion" id="CanalCaptacion" value="Movil"><br>
+	Usuario: <input type="text" name="Usuario" id="Usuario" value="Javier"><br>
+	Comision: <input type="text" name="Comision" id="Comision"><br>
+	Tasa Cambio: <input type="text" name="TasaCambio" id="TasaCambio"><br>
+
+	<button onclick="sendURL();">Enviar</button>
+	
+<script>
+function sendURL(){
+		var pais = document.getElementById('Pais').value;
+		var codigoPostal = document.getElementById('CodigoPostal').value;
+		var paisDestino = document.getElementById('PaisDestino').value;
+		var competidor = document.getElementById('Competidor').value;
+		var divisa = document.getElementById('Divisa').value;
+		var importe = document.getElementById('Importe').value;
+		var modoEntrega = document.getElementById('ModoEntrega').value;
+		var canalCaptacion = document.getElementById('CanalCaptacion').value;
+		var usuario = document.getElementById('Usuario').value;
+		var comision = document.getElementById('Comision').value;
+		var tasaCambio = document.getElementById('TasaCambio').value;
+		
+		var url = '/competencia/cassandra?pais='+pais+'&codigoPostal='+codigoPostal+'&paisDestino='+paisDestino+'&competidor='+competidor
+				+'&divisa='+divisa+'&importe='+importe+'&modoEntrega='+modoEntrega+'&canalCaptacion='+canalCaptacion+'&usuario='+usuario+'&comision='+comision
+				+'&tasaCambio='+tasaCambio;
+        window.location.href=url;
+}	
+</script>
+</html>
