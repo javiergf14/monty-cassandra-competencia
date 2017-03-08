@@ -5,3 +5,5 @@ bin/
 
 # Python files
 .idea/
+*.pyc
+__pycache__
