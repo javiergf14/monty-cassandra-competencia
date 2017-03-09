@@ -65,7 +65,7 @@ function sendURL(){
 		var comision = document.getElementById('Comision').value;
 		var tasaCambio = document.getElementById('TasaCambio').value;
 		
-		var url = '/competencia/cassandra?competidor='+competidor+'&pais='+pais+'&ciudad='+ciudad+'&codigoPostal='+codigoPostal+'&paisDestino='+paisDestino
+		var url = '/competencia/insertar_result?competidor='+competidor+'&pais='+pais+'&ciudad='+ciudad+'&codigoPostal='+codigoPostal+'&paisDestino='+paisDestino
 				+'&divisa='+divisa+'&importe='+importe+'&modoEntrega='+modoEntrega+'&canalCaptacion='+canalCaptacion+'&usuario='+usuario+'&comision='+comision
 				+'&tasaCambio='+tasaCambio;
         window.location.href=url;

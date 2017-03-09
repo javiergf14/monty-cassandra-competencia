@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Precios competencia</title>
+	
+	<style>
+	html,body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+	
+	#map {
+		height: 100%;
+	}
+	
+	#floating-panel {
+		position: absolute;
+		top: 10px;
+		left: 25%;
+		z-index: 5;
+		background-color: #fff;
+		padding: 5px;
+		border: 1px solid #999;
+		text-align: center;
+		font-family: 'Roboto', 'sans-serif';
+		line-height: 30px;
+		padding-left: 10px;
+	}
+	</style>
+</head>
+
+<body>
+	Introduzca los campos a insertar en Cassandra (por ahora hay que escribirlos, proximo update se podran seleccionar algunos):
+	<br> 
+	<br>
+
+	Ciudad: <input type="text" name="Ciudad" id="Ciudad"><br>
+    Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
+    Divisa: <input type="text" name="Divisa" id="Divisa" value="Todos"><br>
+	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
+    Importe: <input type="text" name="Importe" id="Importe" value="100"><br>
+
+	<button onclick="sendURL();">Enviar</button>
+</body>
+<script>
+function sendURL(){
+        var ciudad = document.getElementById('Ciudad').value;
+        var paisDestino = document.getElementById('PaisDestino').value;
+        var divisa = document.getElementById('Divisa').value;
+        var competidor = document.getElementById('Competidor').value;
+		var importe = document.getElementById('Importe').value;
+
+		var url = '/competencia/query1_result?ciudad='+ciudad+'&paisDestino='+paisDestino+'&divisa='+divisa+'&competidor='+competidor+'&importe='+importe;
+        window.location.href=url;
+}	
+</script>
+</html>

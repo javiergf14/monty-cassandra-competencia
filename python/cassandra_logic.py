@@ -176,3 +176,12 @@ class CassandraLogic:
                 row.append(str(r))
             rows.append(row)
         return rows
+
+    def group_by(self, table_name, ciudad, pais_destino, importe):
+        query = "SELECT divisa, competidor, max(importe_destino(comision, tasa_cambio, {1})) as recibe FROM {0} ".format(table_name, importe)
+        query += "WHERE ciudad='{}' AND pais_destino='{}' GROUP BY divisa;".format(ciudad, pais_destino)
+        results = self.session.execute(query)
+        rows = []
+        for res in results:
+            rows.append(res)
+        return rows
