@@ -45,7 +45,7 @@ def reset():
     return render_template('reset.html', **locals())
 
 
-@app.route("/competencia/cassandra", methods=['GET'])
+@app.route("/competencia/insertar_result", methods=['GET'])
 def cassandra():
     # Requesting POST parameters.
     pais = request.args.get('pais')
@@ -88,7 +88,7 @@ def cassandra():
 
     # Insert data in table.
     cassandra.insert_data('precios', column_names, column_values)
-    return render_template('cassandra.html', **locals())
+    return render_template('insertar_result.html', **locals())
 
 
 if __name__ == "__main__":
