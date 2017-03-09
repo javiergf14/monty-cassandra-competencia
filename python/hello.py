@@ -51,6 +51,7 @@ def cassandra():
     pais = request.args.get('pais')
     codigo_postal = request.args.get('codigoPostal')
     pais_destino = request.args.get('paisDestino')
+    ciudad = request.args.get('ciudad')
     competidor = request.args.get('competidor')
     divisa = request.args.get('divisa')
     importe = request.args.get('importe')
@@ -60,13 +61,10 @@ def cassandra():
     timestamp = int(time.time())
     comision = request.args.get('comision')
     tasa_cambio = request.args.get('tasaCambio')
-    ciudad = request.args.get('ciudad')
 
     # Creating a Cassandra Logic object.
     cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
 
-    # Create and drop the key space.
-    # cassandra = cassandra_init.drop_and_create_keyspace()
     # Just connect to the key space.
     cassandra = cassandra_init.connect_keyspace()
 
@@ -89,8 +87,7 @@ def cassandra():
     column_values = [str(v) for v in column_values]
 
     # Insert data in table.
-    #cassandra.insert_data('precios', column_names, column_values)
-    results = cassandra.group_by('precios', ciudad, pais_destino, importe)
+    cassandra.insert_data('precios', column_names, column_values)
     return render_template('cassandra.html', **locals())
 
 
