@@ -46,9 +46,10 @@
 	Usuario: <input type="text" name="Usuario" id="Usuario" value="Javier"><br>
 	Comision: <input type="text" name="Comision" id="Comision"><br>
 	Tasa Cambio: <input type="text" name="TasaCambio" id="TasaCambio"><br>
+	Ciudad: <input type="text" name="Ciudad" id="Ciudad"><br>
 
 	<button onclick="sendURL();">Enviar</button>
-	
+</body>
 <script>
 function sendURL(){
         var competidor = document.getElementById('Competidor').value;
@@ -62,10 +63,11 @@ function sendURL(){
 		var usuario = document.getElementById('Usuario').value;
 		var comision = document.getElementById('Comision').value;
 		var tasaCambio = document.getElementById('TasaCambio').value;
+		var ciudad = document.getElementById('Ciudad').value;
 		
 		var url = '/competencia/cassandra?competidor='+competidor+'&pais='+pais+'&codigoPostal='+codigoPostal+'&paisDestino='+paisDestino
 				+'&divisa='+divisa+'&importe='+importe+'&modoEntrega='+modoEntrega+'&canalCaptacion='+canalCaptacion+'&usuario='+usuario+'&comision='+comision
-				+'&tasaCambio='+tasaCambio;
+				+'&tasaCambio='+tasaCambio+'&ciudad='+ciudad;
         window.location.href=url;
 }	
 </script>

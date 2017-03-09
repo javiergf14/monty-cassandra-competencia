@@ -60,6 +60,7 @@ def cassandra():
     timestamp = int(time.time())
     comision = request.args.get('comision')
     tasa_cambio = request.args.get('tasaCambio')
+    ciudad = request.args.get('ciudad')
 
     # Creating a Cassandra Logic object.
     cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
@@ -74,18 +75,22 @@ def cassandra():
 
     # Column names to insert.
     # TODO: just include not empty columns.
-    column_names = ["competidor", "codigo_postal", "pais_destino", "pais", "divisa", "importe", "modo_entrega",
-                    "canal_captacion", "user", "timestamp", "comision", "tasa_cambio"]
+    # column_names = ["competidor", "codigo_postal", "pais_destino", "pais", "divisa", "importe", "modo_entrega",
+    #                 "canal_captacion", "user", "timestamp", "comision", "tasa_cambio"]
+    column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp"]
 
     # Column values to insert.
     # TODO: just include not empty columns.
-    column_values = [competidor, codigo_postal, pais_destino, pais, divisa, importe, modo_entrega,
-                     canal_captacion, usuario, timestamp, comision, tasa_cambio]
+    # column_values = [competidor, codigo_postal, pais_destino, pais, divisa, importe, modo_entrega,
+    #                  canal_captacion, usuario, timestamp, comision, tasa_cambio]
+
+    column_values = [ciudad, pais_destino, divisa, competidor, comision, tasa_cambio, timestamp]
     # Convert from unicode to string.
     column_values = [str(v) for v in column_values]
 
     # Insert data in table.
-    cassandra.insert_data('precios', column_names, column_values)
+    #cassandra.insert_data('precios', column_names, column_values)
+    results = cassandra.group_by('precios', ciudad, pais_destino, importe)
     return render_template('cassandra.html', **locals())
 
 

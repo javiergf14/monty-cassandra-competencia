@@ -28,9 +28,10 @@ class CassandraLogic:
         self.string_set.add("modo_entrega")
         self.string_set.add("canal_captacion")
         self.string_set.add("user")
+        self.string_set.add("ciudad")
 
         # Connect the application to the Cassandra cluster
-        cluster = Cluster([contact_point])
+        cluster = Cluster([contact_point], port=9042, cql_version='3.4.4')
         self.session = cluster.connect() if create_keyspace else cluster.connect(self.keyspace)
 
     def connect_keyspace(self):
@@ -80,11 +81,14 @@ class CassandraLogic:
            Args:
                table_name (str): name of the table.
         """
+
         try:
             self.session.execute("DROP TABLE {}".format(table_name))
             self._create_table(table_name)
+            self._create_functions()
         except:
             self._create_table(table_name)
+            self._create_functions()
 
     def _create_table(self, table_name):
         """Create a table with a certain format.
@@ -92,22 +96,48 @@ class CassandraLogic:
             Args:
                 table_name (str): name of the table.
         """
+        # create_table_query = "CREATE TABLE " + table_name + "(" \
+        #                      + "competidor text, " \
+        #                      + "pais text, "\
+        #                      + "codigo_postal text, " \
+        #                      + "pais_destino text, "\
+        #                      + "divisa text, "\
+        #                      + "importe varint, "\
+        #                      + "modo_entrega text, "\
+        #                      + "canal_captacion text, "\
+        #                      + "user text, "\
+        #                      + "timestamp varint, "\
+        #                      + "comision varint, "\
+        #                      + "tasa_cambio varint, "\
+        #                      + "PRIMARY KEY (competidor, pais, codigo_postal, pais_destino, divisa, importe, modo_entrega) );"
+
         create_table_query = "CREATE TABLE " + table_name + "(" \
+                             + "ciudad text, "\
+                             + "pais_destino text, " \
+                             + "divisa text, " \
                              + "competidor text, " \
-                             + "pais text, "\
-                             + "codigo_postal text, " \
-                             + "pais_destino text, "\
-                             + "divisa text, "\
-                             + "importe varint, "\
-                             + "modo_entrega text, "\
-                             + "canal_captacion text, "\
-                             + "user text, "\
-                             + "timestamp varint, "\
-                             + "comision varint, "\
-                             + "tasa_cambio varint, "\
-                             + "PRIMARY KEY (competidor, pais, codigo_postal, pais_destino, divisa, importe, modo_entrega) );"
+                             + "comision double, " \
+                             + "tasa_cambio double, " \
+                             + "timestamp double, " \
+                             + "PRIMARY KEY (ciudad, pais_destino, divisa, competidor) );"
 
         self.session.execute(create_table_query)
+
+    def _create_functions(self):
+        """Create User Defined Functions
+
+           Function 1:
+               Calculate the importe_destino based on the comision, importe and tasa_cambio.
+               Formula: importe_destino = importe*tasa_cambio - comision
+        """
+        self.session.execute("""
+            CREATE FUNCTION importe_destino(comision double, tasa_cambio double, importe double)
+                RETURNS NULL ON NULL INPUT
+                RETURNS double
+                LANGUAGE java
+                AS '
+                return importe*tasa_cambio-comision;'
+        """)
 
     def insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
