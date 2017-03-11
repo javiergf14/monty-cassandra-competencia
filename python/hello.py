@@ -1,6 +1,7 @@
 from cassandra_logic import CassandraLogic
 from flask import Flask, render_template, request
 from utils.geolocation import GeoLocation
+import Geohash
 
 import time
 
@@ -32,7 +33,7 @@ def busqueda():
     cassandra = cassandra_init.connect_keyspace()
 
     rows = cassandra.select_all('query1')
-    rows2 = cassandra.select_all('query2')
+    rows2 = cassandra.select_all('query3')
     return render_template('busqueda.html', **locals())
 
 @app.route("/competencia/reset", methods=['GET'])
@@ -44,7 +45,7 @@ def reset():
     cassandra = cassandra_init.connect_keyspace()
 
     # Drop table.
-    table_names = ["query1", "query2"]
+    table_names = ["query1", "query2", "query3", "query4"]
     cassandra.drop_and_create_tables(table_names)
     return render_template('reset.html', **locals())
 
@@ -65,6 +66,8 @@ def insertar_result():
     timestamp = int(time.time())
     comision = request.args.get('comision')
     tasa_cambio = request.args.get('tasaCambio')
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
 
     # Creating a Cassandra Logic object.
     cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
@@ -84,7 +87,10 @@ def insertar_result():
             "usuario": usuario,
             "timestamp": timestamp,
             "comision": comision,
-            "tasa_cambio": tasa_cambio}
+            "tasa_cambio": tasa_cambio,
+            "lat": lat,
+            "lon": lon
+            }
 
     cassandra.insert_into_all_tables(data)
     return render_template('insertar_result.html', **locals())
@@ -110,11 +116,57 @@ def query1_result():
 
     results = []
     if competidor == 'Todos':
-        results = cassandra.best_tasa_given_divisa('query1', ciudad, pais_destino, divisa)
+        results = cassandra.best_tasa_given_ciudad('query1', ciudad, pais_destino, divisa)
     else:
         results = cassandra.best_tasa_given_divisa('query2', ciudad, pais_destino, divisa, competidor)
 
     return render_template('query1_result.html', **locals())
+
+@app.route("/competencia/query2", methods=['GET'])
+def query2():
+    return render_template('query2.html', **locals())
+
+
+@app.route("/competencia/query2_result", methods=['GET'])
+def query2_result():
+    # Creating a Cassandra Logic object.
+    cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
+
+    # Just connect to the key space.
+    cassandra = cassandra_init.connect_keyspace()
+
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    pais_destino = request.args.get('paisDestino')
+    divisa = request.args.get('divisa')
+    competidor = request.args.get('competidor')
+    distancia = request.args.get('distancia')
+    mostrar = request.args.get('mostrar')
+
+    loc = GeoLocation.from_degrees(float(lat), float(lon))
+    distance = float(distancia) # 1 kilometer
+    bs_min, bs_max = loc.bounding_locations(distance)
+
+    lat_max = bs_max.deg_lat
+    lon_max = bs_max.deg_lon
+    lat_min = bs_min.deg_lat
+    lon_min = bs_min.deg_lon
+
+    geohash_max = Geohash.encode(lat_max, lon_max)
+    geohash_min = Geohash.encode(lat_min, lon_min)
+
+    print(lat_max, lon_max)
+    print(lat_min, lon_min)
+    print(bs_min)
+    results = []
+    if competidor == 'Todos':
+        results = cassandra.best_tasa_given_coordinates('query3', pais_destino, divisa, geohash_max, geohash_min, mostrar)
+    else:
+        results = cassandra.best_tasa_given_coordinates('query4', pais_destino, divisa, geohash_max, geohash_min,
+                                                        mostrar, competidor)
+
+    return render_template('query2_result.html', **locals())
+
 
 if __name__ == "__main__":
     app.run(host='127.0.0.2', port=80)

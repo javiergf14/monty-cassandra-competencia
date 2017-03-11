@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Precios competencia</title>
+	
+	<style>
+	html,body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+	
+	#map {
+		height: 100%;
+	}
+	
+	#floating-panel {
+		position: absolute;
+		top: 10px;
+		left: 25%;
+		z-index: 5;
+		background-color: #fff;
+		padding: 5px;
+		border: 1px solid #999;
+		text-align: center;
+		font-family: 'Roboto', 'sans-serif';
+		line-height: 30px;
+		padding-left: 10px;
+	}
+	</style>
+</head>
+
+<body>
+	Introduzca los campos a insertar en Cassandra (por ahora hay que escribirlos, proximo update se podran seleccionar algunos):
+	<br> 
+	<br>
+
+	Lat: <input type="text" name="Lat" id="Lat"><br>
+	Lon:  <input type="text" name="Lon" id="Lon"><br>
+    Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
+    Divisa: <input type="text" name="Divisa" id="Divisa"><br>
+	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
+	Distancia: <input type="text" name="Distancia" id="Distancia" value="1"> km <br>
+	Mostrar: <input type="text" name="Mostrar" id="Mostrar" value="10"> mejores <br>
+	<button onclick="sendURL();">Enviar</button>
+</body>
+<script>
+function sendURL(){
+        var lat = document.getElementById('Lat').value;
+        var lon = document.getElementById('Lon').value;
+        var paisDestino = document.getElementById('PaisDestino').value;
+        var divisa = document.getElementById('Divisa').value;
+        var competidor = document.getElementById('Competidor').value;
+        var distancia =  document.getElementById('Distancia').value;
+        var mostrar =  document.getElementById('Mostrar').value;
+
+		var url = '/competencia/query2_result?lat='+lat+'&lon='+lon+'&paisDestino='+paisDestino
+			+'&divisa='+divisa+'&competidor='+competidor+'&distancia='+distancia+'&mostrar='+mostrar;
+        window.location.href=url;
+}	
+</script>
+</html>

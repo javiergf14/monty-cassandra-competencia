@@ -1,5 +1,6 @@
 from cassandra.cluster import Cluster
 from cassandra.protocol import ConfigurationException
+import Geohash
 
 
 class CassandraLogic:
@@ -29,6 +30,7 @@ class CassandraLogic:
         self.string_set.add("canal_captacion")
         self.string_set.add("user")
         self.string_set.add("ciudad")
+        self.string_set.add("geohash")
 
         # Connect the application to the Cassandra cluster
         cluster = Cluster([contact_point], port=9042, cql_version='3.4.4')
@@ -99,24 +101,30 @@ class CassandraLogic:
             self._table1_scheme()
         elif table_name == "query2":
             self._table2_scheme()
+        elif table_name == "query3":
+            self._table3_scheme()
+        elif table_name == "query4":
+            self._table4_scheme()
 
     def insert_into_all_tables(self, data):
         self._query1_scheme(data)
         self._query2_scheme(data)
+        self._query3_scheme(data)
+        self._query4_scheme(data)
 
     def _table1_scheme(self):
         table_name = "query1"
         create_table_query = "CREATE TABLE " + table_name + "(" \
-                             + "ciudad text, " \
                              + "pais_destino text, " \
+                             + "ciudad text, " \
                              + "divisa text, " \
                              + "importe_destino double, " \
                              + "competidor text, " \
                              + "comision double, " \
                              + "tasa_cambio double, " \
                              + "timestamp double, " \
-                             + "PRIMARY KEY (ciudad, pais_destino, divisa, importe_destino) )" \
-                               "WITH CLUSTERING ORDER BY (pais_destino DESC, divisa DESC, importe_destino DESC);"
+                             + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_destino, competidor) )" \
+                               "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_destino DESC, competidor DESC);"
 
         self.session.execute(create_table_query)
 
@@ -135,16 +143,16 @@ class CassandraLogic:
     def _table2_scheme(self):
         table_name = "query2"
         create_table_query = "CREATE TABLE " + table_name + "(" \
-                             + "ciudad text, " \
                              + "pais_destino text, " \
+                             + "ciudad text, " \
                              + "divisa text, " \
                              + "competidor text, " \
                              + "importe_destino double, " \
                              + "comision double, " \
                              + "tasa_cambio double, " \
                              + "timestamp double, " \
-                             + "PRIMARY KEY (ciudad, pais_destino, divisa, competidor, importe_destino) )" \
-                               "WITH CLUSTERING ORDER BY (pais_destino DESC, divisa DESC, competidor DESC, importe_destino DESC);"
+                             + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_destino) )" \
+                               "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_destino DESC);"
 
         self.session.execute(create_table_query)
 
@@ -160,6 +168,73 @@ class CassandraLogic:
         importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
         column_values.append(importe_destino)
         self._insert_data(table_name, column_names, column_values)
+
+    def _query3_scheme(self, data):
+        table_name = "query3"
+        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon"]
+        column_values = []
+        for i in column_names:
+            column_values.append(data[i])
+
+        column_names.append("importe_destino")
+        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
+        column_values.append(importe_destino)
+
+        column_names.append("geohash")
+        column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
+        self._insert_data(table_name, column_names, column_values)
+
+    def _table3_scheme(self):
+        table_name = "query3"
+        create_table_query = "CREATE TABLE " + table_name + "(" \
+                             + "pais_destino text, " \
+                             + "divisa text, " \
+                             + "geohash text, " \
+                             + "importe_destino double, " \
+                             + "competidor text, " \
+                             + "comision double, " \
+                             + "tasa_cambio double, " \
+                             + "timestamp double, " \
+                             + "lat double, " \
+                             + "lon double, " \
+                             + "PRIMARY KEY (pais_destino, divisa, geohash, importe_destino, competidor) )" \
+                               "WITH CLUSTERING ORDER BY (divisa DESC, geohash DESC, importe_destino DESC, competidor DESC);"
+
+        self.session.execute(create_table_query)
+
+    def _query4_scheme(self, data):
+        table_name = "query4"
+        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon"]
+        column_values = []
+        for i in column_names:
+            column_values.append(data[i])
+
+        column_names.append("importe_destino")
+        importe_destino = 100 * float(data["tasa_cambio"]) - float(data["comision"])
+        column_values.append(importe_destino)
+
+        column_names.append("geohash")
+        column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
+        self._insert_data(table_name, column_names, column_values)
+
+    def _table4_scheme(self):
+        table_name = "query4"
+        create_table_query = "CREATE TABLE " + table_name + "(" \
+                             + "pais_destino text, " \
+                             + "divisa text, " \
+                             + "competidor text, " \
+                             + "geohash text, " \
+                             + "importe_destino double, " \
+                             + "comision double, " \
+                             + "tasa_cambio double, " \
+                             + "timestamp double, " \
+                             + "lat double, " \
+                             + "lon double, " \
+                             + "PRIMARY KEY (pais_destino, divisa, competidor, geohash, importe_destino) )" \
+                               "WITH CLUSTERING ORDER BY (divisa DESC, competidor DESC, geohash DESC, importe_destino DESC);"
+
+        self.session.execute(create_table_query)
+
 
     def _insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
@@ -199,13 +274,30 @@ class CassandraLogic:
             rows.append(row)
         return rows
 
-    def best_tasa_given_divisa(self, table_name, ciudad, pais_destino, divisa, competidor=None):
+    def best_tasa_given_ciudad(self, table_name, ciudad, pais_destino, divisa, competidor=None):
         query = "SELECT * FROM {} ".format(table_name)
-        query += "WHERE ciudad='{}' AND pais_destino='{}' AND divisa='{}' ".format(ciudad, pais_destino, divisa)
+        query += "WHERE pais_destino='{}' AND ciudad='{}' AND divisa='{}' ".format(pais_destino, ciudad, divisa)
         if competidor:
             query += "AND competidor='{}' ".format(competidor)
         query +=  "LIMIT 1"
         results = self.session.execute(query)
+        rows = []
+        for res in results:
+            row = []
+            for r in res:
+                row.append(str(r))
+            rows.append(row)
+        return rows
+
+    def best_tasa_given_coordinates(self, table_name, pais_destino, divisa, geohash_max, geohash_min, mostrar, competidor=None):
+        query = "SELECT * FROM {} ".format(table_name)
+        query += "WHERE pais_destino='{}' AND divisa='{}' ".format(pais_destino, divisa)
+        if competidor:
+            query += "AND competidor='{}' ".format(competidor)
+        query += "AND geohash < '{}' AND geohash > '{}' ".format(geohash_max, geohash_min)
+        query += "LIMIT {}".format(mostrar)
+        results = self.session.execute(query)
+
         rows = []
         for res in results:
             row = []
