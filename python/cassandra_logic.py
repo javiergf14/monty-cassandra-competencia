@@ -72,7 +72,7 @@ class CassandraLogic:
                                                                      "'replication_factor' : 3}"
         self.session.execute(create_keyspace_query)
 
-    def drop_and_create_table(self, table_name):
+    def drop_and_create_tables(self, table_names):
         """Drop and create a table.
 
            First, it tries to drop the table and then it creates the table.
@@ -81,14 +81,13 @@ class CassandraLogic:
            Args:
                table_name (str): name of the table.
         """
+        for table_name in table_names:
+            try:
+                self.session.execute("DROP TABLE {}".format(table_name))
+                self._create_table(table_name)
 
-        try:
-            self.session.execute("DROP TABLE {}".format(table_name))
-            self._create_table(table_name)
-            self._create_functions()
-        except:
-            self._create_table(table_name)
-            self._create_functions()
+            except:
+                self._create_table(table_name)
 
     def _create_table(self, table_name):
         """Create a table with a certain format.
@@ -96,50 +95,73 @@ class CassandraLogic:
             Args:
                 table_name (str): name of the table.
         """
-        # create_table_query = "CREATE TABLE " + table_name + "(" \
-        #                      + "competidor text, " \
-        #                      + "pais text, "\
-        #                      + "codigo_postal text, " \
-        #                      + "pais_destino text, "\
-        #                      + "divisa text, "\
-        #                      + "importe varint, "\
-        #                      + "modo_entrega text, "\
-        #                      + "canal_captacion text, "\
-        #                      + "user text, "\
-        #                      + "timestamp varint, "\
-        #                      + "comision varint, "\
-        #                      + "tasa_cambio varint, "\
-        #                      + "PRIMARY KEY (competidor, pais, codigo_postal, pais_destino, divisa, importe, modo_entrega) );"
+        if table_name == "query1":
+            self._table1_scheme()
+        elif table_name == "query2":
+            self._table2_scheme()
 
+    def insert_into_all_tables(self, data):
+        self._query1_scheme(data)
+        self._query2_scheme(data)
+
+    def _table1_scheme(self):
+        table_name = "query1"
         create_table_query = "CREATE TABLE " + table_name + "(" \
-                             + "ciudad text, "\
+                             + "ciudad text, " \
                              + "pais_destino text, " \
                              + "divisa text, " \
+                             + "importe_destino double, " \
                              + "competidor text, " \
                              + "comision double, " \
                              + "tasa_cambio double, " \
                              + "timestamp double, " \
-                             + "PRIMARY KEY (ciudad, pais_destino, divisa, competidor) );"
+                             + "PRIMARY KEY (ciudad, pais_destino, divisa, importe_destino) )" \
+                               "WITH CLUSTERING ORDER BY (pais_destino DESC, divisa DESC, importe_destino DESC);"
 
         self.session.execute(create_table_query)
 
-    def _create_functions(self):
-        """Create User Defined Functions
+    def _query1_scheme(self, data):
+        table_name = "query1"
+        column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp"]
+        column_values = []
+        for i in column_names:
+            column_values.append(data[i])
 
-           Function 1:
-               Calculate the importe_destino based on the comision, importe and tasa_cambio.
-               Formula: importe_destino = importe*tasa_cambio - comision
-        """
-        self.session.execute("""
-            CREATE FUNCTION importe_destino(comision double, tasa_cambio double, importe double)
-                RETURNS NULL ON NULL INPUT
-                RETURNS double
-                LANGUAGE java
-                AS '
-                return importe*tasa_cambio-comision;'
-        """)
+        column_names.append("importe_destino")
+        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
+        column_values.append(importe_destino)
+        self._insert_data(table_name, column_names, column_values)
 
-    def insert_data(self, table_name, column_names, column_values):
+    def _table2_scheme(self):
+        table_name = "query2"
+        create_table_query = "CREATE TABLE " + table_name + "(" \
+                             + "ciudad text, " \
+                             + "pais_destino text, " \
+                             + "divisa text, " \
+                             + "competidor text, " \
+                             + "importe_destino double, " \
+                             + "comision double, " \
+                             + "tasa_cambio double, " \
+                             + "timestamp double, " \
+                             + "PRIMARY KEY (ciudad, pais_destino, divisa, competidor, importe_destino) )" \
+                               "WITH CLUSTERING ORDER BY (pais_destino DESC, divisa DESC, competidor DESC, importe_destino DESC);"
+
+        self.session.execute(create_table_query)
+
+
+    def _query2_scheme(self, data):
+        table_name = "query2"
+        column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp"]
+        column_values = []
+        for i in column_names:
+            column_values.append(data[i])
+
+        column_names.append("importe_destino")
+        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
+        column_values.append(importe_destino)
+        self._insert_data(table_name, column_names, column_values)
+
+    def _insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
 
            Notice we do not need to include all the columns names nor columns values due to the flexible schema.
@@ -153,7 +175,7 @@ class CassandraLogic:
         insert_data_query = "INSERT INTO {} (".format(table_name)
         insert_data_query += ",".join(column_names)
         insert_data_query += ") VALUES("
-        processed_values = ["'"+c+"'" if column_names[cont] in self.string_set else c for cont, c in enumerate(column_values)]
+        processed_values = ["'"+c+"'" if column_names[cont] in self.string_set else str(c) for cont, c in enumerate(column_values)]
         insert_data_query += ",".join(processed_values)
         insert_data_query += ");"
 
@@ -177,9 +199,12 @@ class CassandraLogic:
             rows.append(row)
         return rows
 
-    def group_by(self, table_name, ciudad, pais_destino, importe):
-        query = "SELECT divisa, competidor, max(importe_destino(comision, tasa_cambio, {1})) as recibe FROM {0} ".format(table_name, importe)
-        query += "WHERE ciudad='{}' AND pais_destino='{}' GROUP BY divisa;".format(ciudad, pais_destino)
+    def best_tasa_given_divisa(self, table_name, ciudad, pais_destino, divisa, competidor=None):
+        query = "SELECT * FROM {} ".format(table_name)
+        query += "WHERE ciudad='{}' AND pais_destino='{}' AND divisa='{}' ".format(ciudad, pais_destino, divisa)
+        if competidor:
+            query += "AND competidor='{}' ".format(competidor)
+        query +=  "LIMIT 1"
         results = self.session.execute(query)
         rows = []
         for res in results:

@@ -37,10 +37,8 @@
 
 	Ciudad: <input type="text" name="Ciudad" id="Ciudad"><br>
     Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
-    Divisa: <input type="text" name="Divisa" id="Divisa" value="Todos"><br>
+    Divisa: <input type="text" name="Divisa" id="Divisa"><br>
 	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
-    Importe: <input type="text" name="Importe" id="Importe" value="100"><br>
-
 	<button onclick="sendURL();">Enviar</button>
 </body>
 <script>
@@ -49,9 +47,8 @@ function sendURL(){
         var paisDestino = document.getElementById('PaisDestino').value;
         var divisa = document.getElementById('Divisa').value;
         var competidor = document.getElementById('Competidor').value;
-		var importe = document.getElementById('Importe').value;
 
-		var url = '/competencia/query1_result?ciudad='+ciudad+'&paisDestino='+paisDestino+'&divisa='+divisa+'&competidor='+competidor+'&importe='+importe;
+		var url = '/competencia/query1_result?ciudad='+ciudad+'&paisDestino='+paisDestino+'&divisa='+divisa+'&competidor='+competidor;
         window.location.href=url;
 }	
 </script>

@@ -31,7 +31,8 @@ def busqueda():
     # Connect to the key space.
     cassandra = cassandra_init.connect_keyspace()
 
-    rows = cassandra.select_all('precios')
+    rows = cassandra.select_all('query1')
+    rows2 = cassandra.select_all('query2')
     return render_template('busqueda.html', **locals())
 
 @app.route("/competencia/reset", methods=['GET'])
@@ -43,12 +44,13 @@ def reset():
     cassandra = cassandra_init.connect_keyspace()
 
     # Drop table.
-    cassandra.drop_and_create_table('precios')
+    table_names = ["query1", "query2"]
+    cassandra.drop_and_create_tables(table_names)
     return render_template('reset.html', **locals())
 
 
-@app.route("/competencia/cassandra", methods=['GET'])
-def cassandra():
+@app.route("/competencia/insertar_result", methods=['GET'])
+def insertar_result():
     # Requesting POST parameters.
     pais = request.args.get('pais')
     codigo_postal = request.args.get('codigoPostal')
@@ -70,24 +72,22 @@ def cassandra():
     # Just connect to the key space.
     cassandra = cassandra_init.connect_keyspace()
 
-    # Column names to insert.
-    # TODO: just include not empty columns.
-    # column_names = ["competidor", "codigo_postal", "pais_destino", "pais", "divisa", "importe", "modo_entrega",
-    #                 "canal_captacion", "user", "timestamp", "comision", "tasa_cambio"]
-    column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp"]
+    data = {"pais": pais,
+            "codigo_postal": codigo_postal,
+            "pais_destino": pais_destino,
+            "ciudad": ciudad,
+            "competidor": competidor,
+            "divisa": divisa,
+            "importe": importe,
+            "modo_entrega": modo_entrega,
+            "canal_captacion": canal_captacion,
+            "usuario": usuario,
+            "timestamp": timestamp,
+            "comision": comision,
+            "tasa_cambio": tasa_cambio}
 
-    # Column values to insert.
-    # TODO: just include not empty columns.
-    # column_values = [competidor, codigo_postal, pais_destino, pais, divisa, importe, modo_entrega,
-    #                  canal_captacion, usuario, timestamp, comision, tasa_cambio]
-
-    column_values = [ciudad, pais_destino, divisa, competidor, comision, tasa_cambio, timestamp]
-    # Convert from unicode to string.
-    column_values = [str(v) for v in column_values]
-
-    # Insert data in table.
-    cassandra.insert_data('precios', column_names, column_values)
-    return render_template('cassandra.html', **locals())
+    cassandra.insert_into_all_tables(data)
+    return render_template('insertar_result.html', **locals())
 
 
 @app.route("/competencia/query1", methods=['GET'])
@@ -107,13 +107,12 @@ def query1_result():
     pais_destino = request.args.get('paisDestino')
     divisa = request.args.get('divisa')
     competidor = request.args.get('competidor')
-    importe = request.args.get('importe')
 
     results = []
-    if competidor == 'Todos' and divisa == 'Todos':
-        results = cassandra.group_by('precios', ciudad, pais_destino, importe)
+    if competidor == 'Todos':
+        results = cassandra.best_tasa_given_divisa('query1', ciudad, pais_destino, divisa)
     else:
-        print('not supported yet')
+        results = cassandra.best_tasa_given_divisa('query2', ciudad, pais_destino, divisa, competidor)
 
     return render_template('query1_result.html', **locals())
 
