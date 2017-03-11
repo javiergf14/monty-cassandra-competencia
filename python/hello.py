@@ -1,5 +1,7 @@
 from cassandra_logic import CassandraLogic
 from flask import Flask, render_template, request
+from utils.geolocation import GeoLocation
+
 import time
 
 # FLASK section.

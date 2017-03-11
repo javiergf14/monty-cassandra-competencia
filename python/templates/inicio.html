@@ -33,11 +33,14 @@
 <body>
 	Indique si desea insertar, buscar o resetear información sobre captación de precios de competencia:
 	<br>
-	<button onclick="sendInsertarURL();">Insertar</button>
+	<button onclick="sendInsertarURL();">Insertar datos</button>
 	
-	<button onclick="sendBusquedaURL();">Búsqueda</button>
+	<button onclick="sendBusquedaURL();">Mostra tabla</button>
 
-	<button onclick="sendResetURL();">Reset</button>
+	<button onclick="sendResetURL();">Resetear tabla</button>
+
+	<br>
+    <button onclick="sendQuery1URL();">Query 1: Mejor tasa de una ciudad</button>
 </body>
 
 <script>
@@ -53,6 +56,11 @@ function sendBusquedaURL(){
 
 function sendResetURL(){
 	var url = '/competencia/reset';
+    window.location.href=url;
+}
+
+function sendQuery1URL(){
+	var url = '/competencia/query1';
     window.location.href=url;
 }
 

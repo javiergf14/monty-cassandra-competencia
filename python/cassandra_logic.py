@@ -183,5 +183,8 @@ class CassandraLogic:
         results = self.session.execute(query)
         rows = []
         for res in results:
-            rows.append(res)
+            row = []
+            for r in res:
+                row.append(str(r))
+            rows.append(row)
         return rows
