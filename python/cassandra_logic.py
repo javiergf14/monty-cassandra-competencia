@@ -172,7 +172,7 @@ class CassandraLogic:
 
     def _query3_scheme(self, data):
         table_name = "query3"
-        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon"]
+        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon", "ciudad"]
         column_values = []
         for i in column_names:
             column_values.append(data[i])
@@ -198,6 +198,7 @@ class CassandraLogic:
                              + "timestamp double, " \
                              + "lat double, " \
                              + "lon double, " \
+                             + "ciudad text, " \
                              + "PRIMARY KEY (pais_destino, divisa, geohash, importe_destino, competidor))" \
                                "WITH CLUSTERING ORDER BY (divisa DESC, geohash DESC, importe_destino DESC, competidor DESC);"
 
@@ -205,7 +206,7 @@ class CassandraLogic:
 
     def _query4_scheme(self, data):
         table_name = "query4"
-        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon"]
+        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon", "ciudad"]
         column_values = []
         for i in column_names:
             column_values.append(data[i])
@@ -231,6 +232,7 @@ class CassandraLogic:
                              + "timestamp double, " \
                              + "lat double, " \
                              + "lon double, " \
+                             + "ciudad text, " \
                              + "PRIMARY KEY (pais_destino, divisa, competidor, geohash, importe_destino))" \
                                "WITH CLUSTERING ORDER BY (divisa DESC, competidor DESC, geohash DESC, importe_destino DESC);"
 
