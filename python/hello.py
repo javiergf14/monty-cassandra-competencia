@@ -33,10 +33,12 @@ def busqueda():
     rows2 = cassandra.select_all('query3')
     return render_template('busqueda.html', **locals())
 
+
 @app.route("/competencia/reset", methods=['GET'])
 def reset():
     # Creating a Cassandra Logic object.
-    #cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
+    cassandra_reset = CassandraLogic('127.0.0.1', 'precios_competencia')
+    cassandra_reset.drop_and_create_keyspace()
 
     # Connect to the key space.
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
@@ -96,9 +98,6 @@ def query1():
 
 @app.route("/competencia/query1_result", methods=['GET'])
 def query1_result():
-    # Creating a Cassandra Logic object.
-    #cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia')
-
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     ciudad = request.args.get('ciudad')
@@ -121,9 +120,6 @@ def query2():
 
 @app.route("/competencia/query2_result", methods=['GET'])
 def query2_result():
-    # Creating a Cassandra Logic object.
-    #cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia')
-
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     lat = request.args.get('lat')
