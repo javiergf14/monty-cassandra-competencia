@@ -1,10 +1,8 @@
-
-
 class Table:
 
     @staticmethod
-    def table1_scheme():
-        table_name = "query1"
+    def table_ciudad_scheme():
+        table_name = "ciudad_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                              + "pais_destino text, " \
                              + "ciudad text, " \
@@ -14,13 +12,16 @@ class Table:
                              + "comision double, " \
                              + "tasa_cambio double, " \
                              + "timestamp double, " \
+                             + "lat double, " \
+                             + "lon double, " \
+                             + "num_agente int," \
                              + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_destino, competidor) )" \
                                "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_destino DESC, competidor DESC);"
         return table_query
 
     @staticmethod
-    def table2_scheme():
-        table_name = "query2"
+    def table_ciudad_competidor_scheme():
+        table_name = "ciudad_competidor_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                              + "pais_destino text, " \
                              + "ciudad text, " \
@@ -30,13 +31,16 @@ class Table:
                              + "comision double, " \
                              + "tasa_cambio double, " \
                              + "timestamp double, " \
+                             + "lat double, " \
+                             + "lon double, " \
+                             + "num_agente int," \
                              + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_destino))" \
                                "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_destino DESC);"
         return table_query
 
     @staticmethod
-    def table3_scheme():
-        table_name = "query3"
+    def table_geohash_scheme():
+        table_name = "geohash_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                              + "pais_destino text, " \
                              + "divisa text, " \
@@ -48,6 +52,7 @@ class Table:
                              + "timestamp double, " \
                              + "lat double, " \
                              + "lon double, " \
+                             + "num_agente int, " \
                              + "ciudad text, " \
                              + "PRIMARY KEY (pais_destino, divisa, geohash, importe_destino, competidor))" \
                                "WITH CLUSTERING ORDER BY (divisa DESC, geohash DESC, importe_destino DESC, competidor DESC);"
@@ -55,8 +60,8 @@ class Table:
         return table_query
 
     @staticmethod
-    def table4_scheme():
-        table_name = "query4"
+    def table_geohash_competidor_scheme():
+        table_name = "geohash_competidor_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                              + "pais_destino text, " \
                              + "divisa text, " \
@@ -68,6 +73,7 @@ class Table:
                              + "timestamp double, " \
                              + "lat double, " \
                              + "lon double, " \
+                             + "num_agente int, " \
                              + "ciudad text, " \
                              + "PRIMARY KEY (pais_destino, divisa, competidor, geohash, importe_destino))" \
                                "WITH CLUSTERING ORDER BY (divisa DESC, competidor DESC, geohash DESC, importe_destino DESC);"
@@ -75,8 +81,8 @@ class Table:
         return table_query
 
     @staticmethod
-    def table5_scheme():
-        table_name = "query5"
+    def table_agente_scheme():
+        table_name = "agente_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + "pais_destino text, " \
                       + "num_agente int, " \
@@ -87,13 +93,15 @@ class Table:
                       + "tasa_cambio double, " \
                       + "timestamp double, " \
                       + "ciudad text, " \
+                      + "lat double, " \
+                      + "lon double, " \
                       + "PRIMARY KEY (pais_destino, num_agente, divisa, importe_destino, competidor) )" \
                         "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, importe_destino DESC, competidor DESC);"
         return table_query
 
     @staticmethod
-    def table6_scheme():
-        table_name = "query6"
+    def table_agente_competidor_scheme():
+        table_name = "agente_competidor_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + "pais_destino text, " \
                       + "num_agente int, " \
@@ -104,6 +112,86 @@ class Table:
                       + "tasa_cambio double, " \
                       + "timestamp double, " \
                       + "ciudad text, " \
+                      + "lat double, " \
+                      + "lon double, " \
                       + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, importe_destino) )" \
                         "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, importe_destino DESC);"
         return table_query
+
+    @staticmethod
+    def table_ciudad_timestamp_importe_scheme():
+        table_name = "ciudad_timestamp_importe_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + "pais_destino text, " \
+                      + "ciudad text, " \
+                      + "divisa text, " \
+                      + "timestamp double, " \
+                      + "importe_destino double, " \
+                      + "competidor text, " \
+                      + "comision double, " \
+                      + "tasa_cambio double, " \
+                      + "lat double, " \
+                      + "lon double, " \
+                      + "num_agente int," \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, timestamp, importe_destino, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, timestamp DESC, importe_destino DESC, competidor DESC);"
+        return table_query
+
+    @staticmethod
+    def table_ciudad_importe_timestamp_scheme():
+        table_name = "ciudad_importe_timestamp_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + "pais_destino text, " \
+                      + "ciudad text, " \
+                      + "divisa text, " \
+                      + "importe_destino double, " \
+                      + "timestamp double, " \
+                      + "competidor text, " \
+                      + "comision double, " \
+                      + "tasa_cambio double, " \
+                      + "lat double, " \
+                      + "lon double, " \
+                      + "num_agente int," \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_destino, timestamp, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_destino DESC, timestamp DESC, competidor DESC);"
+        return table_query
+
+    @staticmethod
+    def table_ciudad_competidor_timestamp_scheme():
+        table_name = "ciudad_competidor_timestamp_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + "pais_destino text, " \
+                      + "ciudad text, " \
+                      + "divisa text, " \
+                      + "competidor text, " \
+                      + "timestamp double, " \
+                      + "importe_destino double, " \
+                      + "comision double, " \
+                      + "tasa_cambio double, " \
+                      + "lat double, " \
+                      + "lon double, " \
+                      + "num_agente int," \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, timestamp, importe_destino) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, timestamp DESC, importe_destino DESC);"
+        return table_query
+
+    @staticmethod
+    def table_ciudad_competidor_importe_timestamp_scheme():
+        table_name = "ciudad_competidor_importe_timestamp_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + "pais_destino text, " \
+                      + "ciudad text, " \
+                      + "divisa text, " \
+                      + "competidor text, " \
+                      + "importe_destino double, " \
+                      + "timestamp double, " \
+                      + "comision double, " \
+                      + "tasa_cambio double, " \
+                      + "lat double, " \
+                      + "lon double, " \
+                      + "num_agente int," \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+

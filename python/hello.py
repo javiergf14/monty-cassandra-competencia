@@ -29,9 +29,9 @@ def busqueda():
     # Connect to the key space.
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
-    rows_query1 = cassandra.select_all('query1')
-    rows_query3 = cassandra.select_all('query3')
-    rows_query5 = cassandra.select_all('query5')
+    rows_query1 = cassandra.select_all('ciudad_query')
+    rows_query3 = cassandra.select_all('geohash_query')
+    rows_query5 = cassandra.select_all('agente_query')
     return render_template('busqueda.html', **locals())
 
 
@@ -45,8 +45,7 @@ def reset():
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     # Drop table.
-    table_names = ["query1", "query2", "query3", "query4", "query5", "query6"]
-    cassandra.drop_and_create_tables(table_names)
+    cassandra.drop_and_create_tables()
     return render_template('reset.html', **locals())
 
 
@@ -108,12 +107,37 @@ def query1_result():
     divisa = request.args.get('divisa')
     competidor = request.args.get('competidor')
     mostrar = request.args.get('mostrar')
+    min_ts = request.args.get('minTS')
+    max_ts = request.args.get('maxTS')
+
+    timestamp = []
+    if max_ts != '' and min_ts != '':
+        timestamp = [max_ts, min_ts]
 
     results = []
-    if competidor == 'Todos':
-        results = cassandra.best_tasa_given_ciudad('query1', ciudad, pais_destino, divisa, mostrar)
-    else:
-        results = cassandra.best_tasa_given_ciudad('query2', ciudad, pais_destino, divisa, mostrar, competidor)
+    if competidor == 'Todos': # All the competitors
+        if timestamp: # Timestamp range
+            results = cassandra.best_tasa('ciudad_timestamp_importe_query', pais_destino, divisa,
+                                            ciudad=ciudad,
+                                            timestamp=timestamp,
+                                            alt_table='ciudad_importe_timestamp_query',
+                                            mostrar=mostrar)
+        else:
+            results = cassandra.best_tasa('ciudad_query', pais_destino, divisa,
+                                          ciudad=ciudad,
+                                          mostrar=mostrar)
+    else: # Specific competitor
+        if timestamp: # Timestamp range
+            results = cassandra.best_tasa('ciudad_competidor_timestamp_query', pais_destino, divisa,
+                                          ciudad=ciudad,
+                                          timestamp=timestamp,
+                                          alt_table='ciudad_competidor_importe_timestamp_query',
+                                          mostrar=mostrar)
+        else:
+            results = cassandra.best_tasa('ciudad_competidor_query', pais_destino, divisa,
+                                          ciudad=ciudad,
+                                          competidor=competidor,
+                                          mostrar=mostrar)
 
     return render_template('query1_result.html', **locals())
 
@@ -138,23 +162,21 @@ def query2_result():
     distance = float(distancia) # 1 kilometer
     bs_min, bs_max = loc.bounding_locations(distance)
 
-    lat_max = bs_max.deg_lat
-    lon_max = bs_max.deg_lon
-    lat_min = bs_min.deg_lat
-    lon_min = bs_min.deg_lon
+    geohash_max = Geohash.encode(bs_max.deg_lat,  bs_max.deg_lon)
+    geohash_min = Geohash.encode(bs_min.deg_lat, bs_min.deg_lon)
 
-    geohash_max = Geohash.encode(lat_max, lon_max)
-    geohash_min = Geohash.encode(lat_min, lon_min)
+    geohash = [geohash_max, geohash_min]
 
-    print(lat_max, lon_max)
-    print(lat_min, lon_min)
-    print(bs_min)
     results = []
     if competidor == 'Todos':
-        results = cassandra.best_tasa_given_coordinates('query3', pais_destino, divisa, geohash_max, geohash_min, mostrar)
+        results = cassandra.best_tasa('geohash_query', pais_destino, divisa,
+                                                        geohash=geohash,
+                                                        mostrar=mostrar)
     else:
-        results = cassandra.best_tasa_given_coordinates('query4', pais_destino, divisa, geohash_max, geohash_min,
-                                                        mostrar, competidor)
+        results = cassandra.best_tasa('geohash_competidor_query', pais_destino, divisa,
+                                                        geohash=geohash,
+                                                        competidor=competidor,
+                                                        mostrar=mostrar)
 
     return render_template('query2_result.html', **locals())
 
@@ -176,9 +198,14 @@ def query3_result():
 
     results = []
     if competidor == 'Todos':
-        results = cassandra.best_tasa_given_agente('query5', num_agente, pais_destino, divisa, mostrar)
+        results = cassandra.best_tasa('agente_query',pais_destino, divisa,
+                                                   num_agente=num_agente,
+                                                   mostrar=mostrar)
     else:
-        results = cassandra.best_tasa_given_agente('query6', num_agente, pais_destino, divisa, mostrar, competidor)
+        results = cassandra.best_tasa('agente_competidor_query',pais_destino, divisa,
+                                                   num_agente=num_agente,
+                                                   competidor=competidor,
+                                                   mostrar=mostrar)
 
     return render_template('query3_result.html', **locals())
 

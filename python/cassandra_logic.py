@@ -32,6 +32,18 @@ class CassandraLogic:
         self.string_set.add("user")
         self.string_set.add("ciudad")
         self.string_set.add("geohash")
+        self.tables = {
+          "ciudad_query": Table.table_ciudad_scheme(),
+          "ciudad_competidor_query": Table.table_ciudad_competidor_scheme(),
+          "geohash_query": Table.table_geohash_scheme(),
+          "geohash_competidor_query": Table.table_geohash_competidor_scheme(),
+          "agente_query": Table.table_agente_scheme(),
+          "agente_competidor_query": Table.table_agente_competidor_scheme(),
+          "ciudad_timestamp_importe_query": Table.table_ciudad_timestamp_importe_scheme(),
+          "ciudad_importe_timestamp_query": Table.table_ciudad_importe_timestamp_scheme(),
+          "ciudad_competidor_timestamp_query": Table.table_ciudad_competidor_timestamp_scheme(),
+          "ciudad_competidor_importe_timestamp_query": Table.table_ciudad_competidor_importe_timestamp_scheme()
+          }
 
         # Connect the application to the Cassandra cluster
         cluster = Cluster([contact_point], port=9042, cql_version='3.4.4')
@@ -70,7 +82,7 @@ class CassandraLogic:
                                                                      "'replication_factor' : 3}"
         self.session.execute(create_keyspace_query)
 
-    def drop_and_create_tables(self, table_names):
+    def drop_and_create_tables(self):
         """Drop and create a table.
 
            First, it tries to drop the table and then it creates the table.
@@ -79,87 +91,18 @@ class CassandraLogic:
            Args:
                table_name (str): name of the table.
         """
-        for table_name in table_names:
+
+        for table_name, table_query in self.tables.items():
+            print(self.tables[table_name])
             try:
                 self.session.execute("DROP TABLE {}".format(table_name))
-                self._create_table(table_name)
-
+                self.session.execute(table_query)
             except:
-                self._create_table(table_name)
-
-    def _create_table(self, table_name):
-        """Create a table with a certain format.
-
-            Args:
-                table_name (str): name of the table.
-        """
-        if table_name == "query1":
-            self.session.execute(Table.table1_scheme())
-        elif table_name == "query2":
-            self.session.execute(Table.table2_scheme())
-        elif table_name == "query3":
-            self.session.execute(Table.table3_scheme())
-        elif table_name == "query4":
-            self.session.execute(Table.table4_scheme())
-        elif table_name == "query5":
-            self.session.execute(Table.table5_scheme())
-        elif table_name == "query6":
-            self.session.execute(Table.table6_scheme())
+                self.session.execute(table_query)
 
     def insert_into_all_tables(self, data):
-        if data['ciudad']:
-            self._query1_scheme(data)
-            self._query2_scheme(data)
-        if data['lon'] and data['lat']:
-            self._query3_scheme(data)
-            self._query4_scheme(data)
-        if data['num_agente']:
-            self._query5_scheme(data)
-            self._query6_scheme(data)
-            self._query6_scheme(data)
-
-    def _query1_scheme(self, data):
-        table_name = "query1"
-        column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp"]
-        column_values = []
-        for i in column_names:
-            column_values.append(data[i])
-
-        column_names.append("importe_destino")
-        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
-        column_values.append(importe_destino)
-        self._insert_data(table_name, column_names, column_values)
-
-    def _query2_scheme(self, data):
-        table_name = "query2"
-        column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp"]
-        column_values = []
-        for i in column_names:
-            column_values.append(data[i])
-
-        column_names.append("importe_destino")
-        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
-        column_values.append(importe_destino)
-        self._insert_data(table_name, column_names, column_values)
-
-    def _query3_scheme(self, data):
-        table_name = "query3"
-        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon", "ciudad"]
-        column_values = []
-        for i in column_names:
-            column_values.append(data[i])
-
-        column_names.append("importe_destino")
-        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
-        column_values.append(importe_destino)
-
-        column_names.append("geohash")
-        column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
-        self._insert_data(table_name, column_names, column_values)
-
-    def _query4_scheme(self, data):
-        table_name = "query4"
-        column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon", "ciudad"]
+        column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision",
+                        "tasa_cambio", "timestamp", "lat", "lon", "num_agente"]
         column_values = []
         for i in column_names:
             column_values.append(data[i])
@@ -168,33 +111,16 @@ class CassandraLogic:
         importe_destino = 100 * float(data["tasa_cambio"]) - float(data["comision"])
         column_values.append(importe_destino)
 
-        column_names.append("geohash")
-        column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
-        self._insert_data(table_name, column_names, column_values)
-
-    def _query5_scheme(self, data):
-        table_name = "query5"
-        column_names = ["num_agente", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "ciudad"]
-        column_values = []
-        for i in column_names:
-            column_values.append(data[i])
-
-        column_names.append("importe_destino")
-        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
-        column_values.append(importe_destino)
-        self._insert_data(table_name, column_names, column_values)
-
-    def _query6_scheme(self, data):
-        table_name = "query6"
-        column_names = ["num_agente", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "ciudad"]
-        column_values = []
-        for i in column_names:
-            column_values.append(data[i])
-
-        column_names.append("importe_destino")
-        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
-        column_values.append(importe_destino)
-        self._insert_data(table_name, column_names, column_values)
+        for table_name in self.tables.keys():
+            if table_name.startswith("geo"):
+                column_names.append("geohash")
+                column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
+                self._insert_data(table_name, column_names, column_values)
+                # Remove last items.
+                column_names.pop(-1)
+                column_values.pop(-1)
+            else:
+                self._insert_data(table_name, column_names, column_values)
 
     def _insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
@@ -234,49 +160,57 @@ class CassandraLogic:
             rows.append(row)
         return rows
 
-    def best_tasa_given_ciudad(self, table_name, ciudad, pais_destino, divisa, mostrar, competidor=None):
-        query = "SELECT * FROM {} ".format(table_name)
-        query += "WHERE pais_destino='{}' AND ciudad='{}' AND divisa='{}' ".format(pais_destino, ciudad, divisa)
-        if competidor:
-            query += "AND competidor='{}' ".format(competidor)
-        query +=  "LIMIT {}".format(mostrar)
-        results = self.session.execute(query)
-        rows = []
-        for res in results:
-            row = []
-            for r in res:
-                row.append(str(r))
-            rows.append(row)
-        return rows
+    def best_tasa(self, table_name, pais_destino, divisa,
+                  ciudad=None,
+                  num_agente=None,
+                  geohash = None,
+                  timestamp = None,
+                  competidor=None,
+                  importe_destino=None,
+                  alt_table=None,
+                  mostrar=10):
 
-    def best_tasa_given_coordinates(self, table_name, pais_destino, divisa, geohash_max, geohash_min, mostrar, competidor=None):
-        query = "SELECT * FROM {} ".format(table_name)
-        query += "WHERE pais_destino='{}' AND divisa='{}' ".format(pais_destino, divisa)
+        # If query data between two timestamps, we need a trick to retrieve the row.
+        sel = 'max(importe_destino)' if timestamp and not importe_destino else '*'
+        query = "SELECT {} FROM {} ".format(sel, table_name)
+        query += "WHERE pais_destino='{}' ".format(pais_destino)
+
+        if ciudad:
+            query += "AND ciudad='{}' ".format(ciudad)
+        elif num_agente:
+            query += "AND num_agente={} ".format(num_agente)
+
+        query += "AND divisa='{}' ".format(divisa)
+
         if competidor:
             query += "AND competidor='{}' ".format(competidor)
-        query += "AND geohash < '{}' AND geohash > '{}' ".format(geohash_max, geohash_min)
+
+        if importe_destino:
+            query += "AND importe_destino={} ".format(importe_destino)
+
+        if timestamp:
+            max_ts = timestamp[0]
+            min_ts = timestamp[1]
+            query += "AND timestamp < {} AND timestamp > {} ".format(max_ts, min_ts)
+        elif geohash:
+            max_geohash = geohash[0]
+            min_geohash = geohash[1]
+            query += "AND geohash < '{}' AND geohash > '{}' ".format(max_geohash, min_geohash)
+
         query += "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
-
         rows = []
         for res in results:
             row = []
             for r in res:
                 row.append(str(r))
             rows.append(row)
+
+        if timestamp and not importe_destino:
+            rows = self.best_tasa(alt_table, pais_destino, divisa,
+                                     ciudad=ciudad,
+                                     importe_destino=rows[0][0],
+                                     timestamp=timestamp,
+                                     mostrar=10)
         return rows
 
-    def best_tasa_given_agente(self, table_name, num_agente, pais_destino, divisa, mostrar, competidor=None):
-        query = "SELECT * FROM {} ".format(table_name)
-        query += "WHERE pais_destino='{}' AND num_agente={} AND divisa='{}' ".format(pais_destino, num_agente, divisa)
-        if competidor:
-            query += "AND competidor='{}' ".format(competidor)
-        query +=  "LIMIT {}".format(mostrar)
-        results = self.session.execute(query)
-        rows = []
-        for res in results:
-            row = []
-            for r in res:
-                row.append(str(r))
-            rows.append(row)
-        return rows
