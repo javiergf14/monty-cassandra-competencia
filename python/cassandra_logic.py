@@ -107,10 +107,12 @@ class CassandraLogic:
             self._table4_scheme()
 
     def insert_into_all_tables(self, data):
-        self._query1_scheme(data)
-        self._query2_scheme(data)
-        self._query3_scheme(data)
-        self._query4_scheme(data)
+        if data['ciudad']:
+            self._query1_scheme(data)
+            self._query2_scheme(data)
+        if data['lon'] and data['lat']:
+            self._query3_scheme(data)
+            self._query4_scheme(data)
 
     def _table1_scheme(self):
         table_name = "query1"
@@ -123,7 +125,7 @@ class CassandraLogic:
                              + "comision double, " \
                              + "tasa_cambio double, " \
                              + "timestamp double, " \
-                             + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_destino, competidor) )" \
+                             + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_destino, competidor))" \
                                "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_destino DESC, competidor DESC);"
 
         self.session.execute(create_table_query)
@@ -151,11 +153,10 @@ class CassandraLogic:
                              + "comision double, " \
                              + "tasa_cambio double, " \
                              + "timestamp double, " \
-                             + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_destino) )" \
+                             + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_destino))" \
                                "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_destino DESC);"
 
         self.session.execute(create_table_query)
-
 
     def _query2_scheme(self, data):
         table_name = "query2"
@@ -197,7 +198,7 @@ class CassandraLogic:
                              + "timestamp double, " \
                              + "lat double, " \
                              + "lon double, " \
-                             + "PRIMARY KEY (pais_destino, divisa, geohash, importe_destino, competidor) )" \
+                             + "PRIMARY KEY (pais_destino, divisa, geohash, importe_destino, competidor))" \
                                "WITH CLUSTERING ORDER BY (divisa DESC, geohash DESC, importe_destino DESC, competidor DESC);"
 
         self.session.execute(create_table_query)
@@ -230,11 +231,10 @@ class CassandraLogic:
                              + "timestamp double, " \
                              + "lat double, " \
                              + "lon double, " \
-                             + "PRIMARY KEY (pais_destino, divisa, competidor, geohash, importe_destino) )" \
+                             + "PRIMARY KEY (pais_destino, divisa, competidor, geohash, importe_destino))" \
                                "WITH CLUSTERING ORDER BY (divisa DESC, competidor DESC, geohash DESC, importe_destino DESC);"
 
         self.session.execute(create_table_query)
-
 
     def _insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
