@@ -1,5 +1,6 @@
 from cassandra.cluster import Cluster
 from cassandra.protocol import ConfigurationException
+from tables import Table
 import Geohash
 
 
@@ -50,17 +51,12 @@ class CassandraLogic:
 
             First, it tries to drop the key space and then it creates the key space.
             If the drop fails, it creates directly the key space.
-
-            Returns:
-                New Cassandra Logic instance
-        """
+    """
         try:
             self.session.execute("Drop KEYSPACE {}".format(self.keyspace))
             self._create_keyspace()
         except ConfigurationException:
             self._create_keyspace()
-
-        return self.connect_keyspace()
 
     def _create_keyspace(self):
         """Create new key space.
@@ -98,13 +94,17 @@ class CassandraLogic:
                 table_name (str): name of the table.
         """
         if table_name == "query1":
-            self._table1_scheme()
+            self.session.execute(Table.table1_scheme())
         elif table_name == "query2":
-            self._table2_scheme()
+            self.session.execute(Table.table2_scheme())
         elif table_name == "query3":
-            self._table3_scheme()
+            self.session.execute(Table.table3_scheme())
         elif table_name == "query4":
-            self._table4_scheme()
+            self.session.execute(Table.table4_scheme())
+        elif table_name == "query5":
+            self.session.execute(Table.table5_scheme())
+        elif table_name == "query6":
+            self.session.execute(Table.table6_scheme())
 
     def insert_into_all_tables(self, data):
         if data['ciudad']:
@@ -113,22 +113,10 @@ class CassandraLogic:
         if data['lon'] and data['lat']:
             self._query3_scheme(data)
             self._query4_scheme(data)
-
-    def _table1_scheme(self):
-        table_name = "query1"
-        create_table_query = "CREATE TABLE " + table_name + "(" \
-                             + "pais_destino text, " \
-                             + "ciudad text, " \
-                             + "divisa text, " \
-                             + "importe_destino double, " \
-                             + "competidor text, " \
-                             + "comision double, " \
-                             + "tasa_cambio double, " \
-                             + "timestamp double, " \
-                             + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_destino, competidor))" \
-                               "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_destino DESC, competidor DESC);"
-
-        self.session.execute(create_table_query)
+        if data['num_agente']:
+            self._query5_scheme(data)
+            self._query6_scheme(data)
+            self._query6_scheme(data)
 
     def _query1_scheme(self, data):
         table_name = "query1"
@@ -141,22 +129,6 @@ class CassandraLogic:
         importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
         column_values.append(importe_destino)
         self._insert_data(table_name, column_names, column_values)
-
-    def _table2_scheme(self):
-        table_name = "query2"
-        create_table_query = "CREATE TABLE " + table_name + "(" \
-                             + "pais_destino text, " \
-                             + "ciudad text, " \
-                             + "divisa text, " \
-                             + "competidor text, " \
-                             + "importe_destino double, " \
-                             + "comision double, " \
-                             + "tasa_cambio double, " \
-                             + "timestamp double, " \
-                             + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_destino))" \
-                               "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_destino DESC);"
-
-        self.session.execute(create_table_query)
 
     def _query2_scheme(self, data):
         table_name = "query2"
@@ -185,25 +157,6 @@ class CassandraLogic:
         column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
         self._insert_data(table_name, column_names, column_values)
 
-    def _table3_scheme(self):
-        table_name = "query3"
-        create_table_query = "CREATE TABLE " + table_name + "(" \
-                             + "pais_destino text, " \
-                             + "divisa text, " \
-                             + "geohash text, " \
-                             + "importe_destino double, " \
-                             + "competidor text, " \
-                             + "comision double, " \
-                             + "tasa_cambio double, " \
-                             + "timestamp double, " \
-                             + "lat double, " \
-                             + "lon double, " \
-                             + "ciudad text, " \
-                             + "PRIMARY KEY (pais_destino, divisa, geohash, importe_destino, competidor))" \
-                               "WITH CLUSTERING ORDER BY (divisa DESC, geohash DESC, importe_destino DESC, competidor DESC);"
-
-        self.session.execute(create_table_query)
-
     def _query4_scheme(self, data):
         table_name = "query4"
         column_names = ["pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "lat", "lon", "ciudad"]
@@ -219,24 +172,29 @@ class CassandraLogic:
         column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
         self._insert_data(table_name, column_names, column_values)
 
-    def _table4_scheme(self):
-        table_name = "query4"
-        create_table_query = "CREATE TABLE " + table_name + "(" \
-                             + "pais_destino text, " \
-                             + "divisa text, " \
-                             + "competidor text, " \
-                             + "geohash text, " \
-                             + "importe_destino double, " \
-                             + "comision double, " \
-                             + "tasa_cambio double, " \
-                             + "timestamp double, " \
-                             + "lat double, " \
-                             + "lon double, " \
-                             + "ciudad text, " \
-                             + "PRIMARY KEY (pais_destino, divisa, competidor, geohash, importe_destino))" \
-                               "WITH CLUSTERING ORDER BY (divisa DESC, competidor DESC, geohash DESC, importe_destino DESC);"
+    def _query5_scheme(self, data):
+        table_name = "query5"
+        column_names = ["num_agente", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "ciudad"]
+        column_values = []
+        for i in column_names:
+            column_values.append(data[i])
 
-        self.session.execute(create_table_query)
+        column_names.append("importe_destino")
+        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
+        column_values.append(importe_destino)
+        self._insert_data(table_name, column_names, column_values)
+
+    def _query6_scheme(self, data):
+        table_name = "query6"
+        column_names = ["num_agente", "pais_destino", "divisa", "competidor", "comision", "tasa_cambio", "timestamp", "ciudad"]
+        column_values = []
+        for i in column_names:
+            column_values.append(data[i])
+
+        column_names.append("importe_destino")
+        importe_destino = 100*float(data["tasa_cambio"]) - float(data["comision"])
+        column_values.append(importe_destino)
+        self._insert_data(table_name, column_names, column_values)
 
     def _insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
@@ -276,12 +234,12 @@ class CassandraLogic:
             rows.append(row)
         return rows
 
-    def best_tasa_given_ciudad(self, table_name, ciudad, pais_destino, divisa, competidor=None):
+    def best_tasa_given_ciudad(self, table_name, ciudad, pais_destino, divisa, mostrar, competidor=None):
         query = "SELECT * FROM {} ".format(table_name)
         query += "WHERE pais_destino='{}' AND ciudad='{}' AND divisa='{}' ".format(pais_destino, ciudad, divisa)
         if competidor:
             query += "AND competidor='{}' ".format(competidor)
-        query +=  "LIMIT 1"
+        query +=  "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
         rows = []
         for res in results:
@@ -300,6 +258,21 @@ class CassandraLogic:
         query += "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
 
+        rows = []
+        for res in results:
+            row = []
+            for r in res:
+                row.append(str(r))
+            rows.append(row)
+        return rows
+
+    def best_tasa_given_agente(self, table_name, num_agente, pais_destino, divisa, mostrar, competidor=None):
+        query = "SELECT * FROM {} ".format(table_name)
+        query += "WHERE pais_destino='{}' AND num_agente={} AND divisa='{}' ".format(pais_destino, num_agente, divisa)
+        if competidor:
+            query += "AND competidor='{}' ".format(competidor)
+        query +=  "LIMIT {}".format(mostrar)
+        results = self.session.execute(query)
         rows = []
         for res in results:
             row = []

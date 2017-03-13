@@ -43,6 +43,8 @@
     <button onclick="sendQuery1URL();">Query 1: Mejor tasa de una ciudad</button>
 <br>
     <button onclick="sendQuery2URL();">Query 2: Mejor tasa dada geolocalización</button>
+<br>
+    <button onclick="sendQuery3URL();">Query 3: Mejor tasa de un agente</button>
 </body>
 
 <script>
@@ -68,6 +70,11 @@ function sendQuery1URL(){
 
 function sendQuery2URL(){
 	var url = '/competencia/query2';
+    window.location.href=url;
+}
+
+function sendQuery3URL(){
+	var url = '/competencia/query3';
     window.location.href=url;
 }
 

@@ -35,7 +35,7 @@
 	<br> 
 	<br>
 
-	Ciudad: <input type="text" name="Ciudad" id="Ciudad"><br>
+	Numero agente: <input type="text" name="NumAgente" id="NumAgente"><br>
     Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
     Divisa: <input type="text" name="Divisa" id="Divisa"><br>
 	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
@@ -44,13 +44,14 @@
 </body>
 <script>
 function sendURL(){
-        var ciudad = document.getElementById('Ciudad').value;
+        var numAgente = document.getElementById('NumAgente').value;
         var paisDestino = document.getElementById('PaisDestino').value;
         var divisa = document.getElementById('Divisa').value;
         var competidor = document.getElementById('Competidor').value;
         var mostrar =  document.getElementById('Mostrar').value;
 
-		var url = '/competencia/query1_result?ciudad='+ciudad+'&paisDestino='+paisDestino+'&divisa='+divisa+'&competidor='+competidor+'&mostrar='+mostrar;
+		var url = '/competencia/query3_result?numAgente='+numAgente+'&paisDestino='+paisDestino
+			+'&divisa='+divisa+'&competidor='+competidor+'&mostrar='+mostrar;
         window.location.href=url;
 }	
 </script>

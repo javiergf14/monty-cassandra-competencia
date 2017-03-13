@@ -31,6 +31,7 @@ def busqueda():
 
     rows_query1 = cassandra.select_all('query1')
     rows_query3 = cassandra.select_all('query3')
+    rows_query5 = cassandra.select_all('query5')
     return render_template('busqueda.html', **locals())
 
 
@@ -44,7 +45,7 @@ def reset():
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     # Drop table.
-    table_names = ["query1", "query2", "query3", "query4"]
+    table_names = ["query1", "query2", "query3", "query4", "query5", "query6"]
     cassandra.drop_and_create_tables(table_names)
     return render_template('reset.html', **locals())
 
@@ -67,6 +68,7 @@ def insertar_result():
     tasa_cambio = request.args.get('tasaCambio')
     lat = request.args.get('lat')
     lon = request.args.get('lon')
+    num_agente = request.args.get('numAgente')
 
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
@@ -84,7 +86,8 @@ def insertar_result():
             "comision": comision,
             "tasa_cambio": tasa_cambio,
             "lat": lat,
-            "lon": lon
+            "lon": lon,
+            "num_agente": num_agente
             }
 
     cassandra.insert_into_all_tables(data)
@@ -104,12 +107,13 @@ def query1_result():
     pais_destino = request.args.get('paisDestino')
     divisa = request.args.get('divisa')
     competidor = request.args.get('competidor')
+    mostrar = request.args.get('mostrar')
 
     results = []
     if competidor == 'Todos':
-        results = cassandra.best_tasa_given_ciudad('query1', ciudad, pais_destino, divisa)
+        results = cassandra.best_tasa_given_ciudad('query1', ciudad, pais_destino, divisa, mostrar)
     else:
-        results = cassandra.best_tasa_given_divisa('query2', ciudad, pais_destino, divisa, competidor)
+        results = cassandra.best_tasa_given_ciudad('query2', ciudad, pais_destino, divisa, mostrar, competidor)
 
     return render_template('query1_result.html', **locals())
 
@@ -154,6 +158,29 @@ def query2_result():
 
     return render_template('query2_result.html', **locals())
 
+
+@app.route("/competencia/query3", methods=['GET'])
+def query3():
+    return render_template('query3.html', **locals())
+
+
+@app.route("/competencia/query3_result", methods=['GET'])
+def query3_result():
+    cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
+
+    num_agente = request.args.get('numAgente')
+    pais_destino = request.args.get('paisDestino')
+    divisa = request.args.get('divisa')
+    competidor = request.args.get('competidor')
+    mostrar = request.args.get('mostrar')
+
+    results = []
+    if competidor == 'Todos':
+        results = cassandra.best_tasa_given_agente('query5', num_agente, pais_destino, divisa, mostrar)
+    else:
+        results = cassandra.best_tasa_given_agente('query6', num_agente, pais_destino, divisa, mostrar, competidor)
+
+    return render_template('query3_result.html', **locals())
 
 if __name__ == "__main__":
     app.run(host='127.0.0.2', port=80)

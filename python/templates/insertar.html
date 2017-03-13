@@ -49,6 +49,7 @@
 	Tasa Cambio: <input type="text" name="TasaCambio" id="TasaCambio"><br>
 	Lat: <input type="text" name="Lat" id="Lat"><br>
 	Lon: <input type="text" name="Lon" id="Lon"><br>
+	Numero agente: <input type="text" name="NumAgente" id="NumAgente"><br>
 
 	<button onclick="sendURL();">Enviar</button>
 </body>
@@ -68,10 +69,11 @@ function sendURL(){
 		var tasaCambio = document.getElementById('TasaCambio').value;
 		var lat = document.getElementById('Lat').value;
 		var lon = document.getElementById('Lon').value;
+		var numAgente = document.getElementById('NumAgente').value;
 		
 		var url = '/competencia/insertar_result?competidor='+competidor+'&pais='+pais+'&ciudad='+ciudad+'&codigoPostal='+codigoPostal+'&paisDestino='+paisDestino
 				+'&divisa='+divisa+'&importe='+importe+'&modoEntrega='+modoEntrega+'&canalCaptacion='+canalCaptacion+'&usuario='+usuario+'&comision='+comision
-				+'&tasaCambio='+tasaCambio+'&lat='+lat+'&lon='+lon;
+				+'&tasaCambio='+tasaCambio+'&lat='+lat+'&lon='+lon+'&numAgente='+numAgente;
         window.location.href=url;
 }	
 </script>
