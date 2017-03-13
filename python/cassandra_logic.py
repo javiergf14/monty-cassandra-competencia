@@ -17,7 +17,7 @@ class CassandraLogic:
            session (Session object): A session holds connections to a Cassandra cluster, allowing it to be queried.
        """
 
-    def __init__(self, contact_point, keyspace, create_keyspace):
+    def __init__(self, contact_point, keyspace, create_keyspace=True):
         self.contact_point = contact_point
         self.keyspace = keyspace
         self.string_set = set()
@@ -36,14 +36,14 @@ class CassandraLogic:
         cluster = Cluster([contact_point], port=9042, cql_version='3.4.4')
         self.session = cluster.connect() if create_keyspace else cluster.connect(self.keyspace)
 
-    def connect_keyspace(self):
+    @classmethod
+    def from_existing_keyspace(cls, contact_point, keyspace):
         """Connect the Cassandra cluster to a certain key space.
 
-            Returns:
-                New Cassandra Logic instance.
-
+           Returns:
+               New Cassandra Logic instance.
         """
-        return CassandraLogic(self.contact_point, self.keyspace, False)
+        return cls(contact_point, keyspace, False)
 
     def drop_and_create_keyspace(self):
         """Drop and create new key space.

@@ -26,11 +26,8 @@ def insertar():
 
 @app.route("/competencia/busqueda", methods=['GET'])
 def busqueda():
-    # Creating a Cassandra Logic object.
-    cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
-
     # Connect to the key space.
-    cassandra = cassandra_init.connect_keyspace()
+    cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     rows = cassandra.select_all('query1')
     rows2 = cassandra.select_all('query3')
@@ -39,10 +36,10 @@ def busqueda():
 @app.route("/competencia/reset", methods=['GET'])
 def reset():
     # Creating a Cassandra Logic object.
-    cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
+    #cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
 
     # Connect to the key space.
-    cassandra = cassandra_init.connect_keyspace()
+    cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     # Drop table.
     table_names = ["query1", "query2", "query3", "query4"]
@@ -69,11 +66,7 @@ def insertar_result():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
 
-    # Creating a Cassandra Logic object.
-    cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
-
-    # Just connect to the key space.
-    cassandra = cassandra_init.connect_keyspace()
+    cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     data = {"pais": pais,
             "codigo_postal": codigo_postal,
@@ -104,10 +97,9 @@ def query1():
 @app.route("/competencia/query1_result", methods=['GET'])
 def query1_result():
     # Creating a Cassandra Logic object.
-    cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
+    #cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia')
 
-    # Just connect to the key space.
-    cassandra = cassandra_init.connect_keyspace()
+    cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     ciudad = request.args.get('ciudad')
     pais_destino = request.args.get('paisDestino')
@@ -130,10 +122,9 @@ def query2():
 @app.route("/competencia/query2_result", methods=['GET'])
 def query2_result():
     # Creating a Cassandra Logic object.
-    cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia', True)
+    #cassandra_init = CassandraLogic('127.0.0.1', 'precios_competencia')
 
-    # Just connect to the key space.
-    cassandra = cassandra_init.connect_keyspace()
+    cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     lat = request.args.get('lat')
     lon = request.args.get('lon')
