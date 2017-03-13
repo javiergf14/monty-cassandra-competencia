@@ -29,8 +29,8 @@ def busqueda():
     # Connect to the key space.
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
-    rows = cassandra.select_all('query1')
-    rows2 = cassandra.select_all('query3')
+    rows_query1 = cassandra.select_all('query1')
+    rows_query3 = cassandra.select_all('query3')
     return render_template('busqueda.html', **locals())
 
 
