@@ -64,9 +64,13 @@ class CassandraLogic:
           "ciudad_timestamp_importe_nominal_query": Table.table_ciudad_timestamp_importe_nominal_scheme(self.attributes),
           "ciudad_importe_nominal_y_destino_timestamp_query": Table.table_ciudad_importe_nominal_y_destino_timestamp_scheme(self.attributes),
           "ciudad_fecha_importe_nominal_query": Table.table_ciudad_fecha_importe_nominal_scheme(self.attributes),
-          "ciudad_fecha_importe_destino_query": Table.table_ciudad_fecha_importe_destino_scheme(self.attributes)
+          "ciudad_fecha_importe_destino_query": Table.table_ciudad_fecha_importe_destino_scheme(self.attributes),
+          "ciudad_competidor_importe_nominal_ts_query": Table.table_ciudad_competidor_importe_nominal_ts_scheme(self.attributes),
+          "ciudad_competidor_importes_ts_query": Table.table_ciudad_competidor_importes_ts_scheme(self.attributes),
+          "ciudad_competidor_ts_importe_nominal_query": Table.table_ciudad_competidor_ts_importe_nominal_scheme(self.attributes),
+          "ciudad_competidor_fecha_importe_nominal_query": Table.table_ciudad_competidor_fecha_importe_nominal_scheme(self.attributes),
+          "ciudad_competidor_fecha_importe_destino_query": Table.table_ciudad_competidor_fecha_importe_destino_scheme(self.attributes)
           }
-
 
 
         # Connect the application to the Cassandra cluster
@@ -223,112 +227,16 @@ class CassandraLogic:
                   competidor=None,
                   importe_destino=None,
                   importe_nominal=None,
+                  range_importe_nominal=None,
+                  year=None,
+                  month=None,
+                  day=None,
                   search=None,
                   alt_table=None,
                   mostrar=10):
 
-        if not importe_nominal:
-            return self._best_tasa_no_restriction_importe(table_name, pais_destino, divisa,
-                  ciudad=ciudad,
-                  num_agente=num_agente,
-                  geohash=geohash,
-                  timestamp=timestamp,
-                  competidor=competidor,
-                  importe_destino=importe_destino,
-                  search=search,
-                  alt_table=alt_table,
-                  mostrar=mostrar)
-        else:
-            return self._best_tasa_specific_importe(table_name, pais_destino, divisa,
-                  ciudad=ciudad,
-                  num_agente=num_agente,
-                  geohash=geohash,
-                  timestamp=timestamp,
-                  competidor=competidor,
-                  importe_destino=importe_destino,
-                  importe_nominal=importe_nominal,
-                  search=search,
-                  alt_table=alt_table,
-                  mostrar=mostrar)
-
-
-    def _best_tasa_no_restriction_importe(self, table_name, pais_destino, divisa,
-              ciudad=None,
-              num_agente=None,
-              geohash = None,
-              timestamp = None,
-              competidor=None,
-              importe_destino=None,
-              search=None,
-              alt_table=None,
-              mostrar=10):
-
         # If query data is between two timestamps, we need a trick to retrieve the row.
-        if timestamp and not importe_destino and not search:
-            sel = 'max(importe_destino)'
-        else:
-            sel = '*'
-
-        query = "SELECT {} FROM {} ".format(sel, table_name)
-        query += "WHERE pais_destino='{}' ".format(pais_destino)
-
-        # We search by a) ciudad b) num_agente c) proximity coordinates (later).
-        if ciudad:
-            query += "AND ciudad='{}' ".format(ciudad)
-        elif num_agente:
-            query += "AND num_agente={} ".format(num_agente)
-
-        query += "AND divisa='{}' ".format(divisa)
-
-        # If concrete competidor specified:
-        if competidor:
-            query += "AND competidor='{}' ".format(competidor)
-
-        # If max importe destino (used in range of timestamps).
-        if importe_destino:
-            query += "AND importe_destino={} ".format(importe_destino)
-
-        if timestamp:
-            max_ts = timestamp[0]
-            min_ts = timestamp[1]
-            query += "AND timestamp < {} AND timestamp > {} ".format(max_ts, min_ts)
-        elif geohash:
-            max_geohash = geohash[0]
-            min_geohash = geohash[1]
-            query += "AND geohash < '{}' AND geohash > '{}' ".format(max_geohash, min_geohash)
-        print(query)
-        query += "LIMIT {}".format(mostrar)
-        results = self.session.execute(query)
-
-        rows = []
-        for res in results:
-            row = []
-            for r in res:
-                row.append(str(r))
-            rows.append(row)
-
-        if timestamp and not importe_destino:
-            rows = self.best_tasa(alt_table, pais_destino, divisa,
-                                  ciudad=ciudad,
-                                  importe_destino=rows[0][0],
-                                  timestamp=timestamp,
-                                  mostrar=10)
-        return rows
-
-    def _best_tasa_specific_importe(self, table_name, pais_destino, divisa,
-              ciudad=None,
-              num_agente=None,
-              geohash = None,
-              timestamp = None,
-              competidor=None,
-              importe_destino=None,
-              importe_nominal=None,
-              search=None,
-              alt_table=None,
-              mostrar=10):
-
-        # If query data is between two timestamps, we need a trick to retrieve the row.
-        if timestamp and not importe_destino and not search:
+        if (timestamp or range_importe_nominal) and not importe_destino and not search:
             sel = 'max(importe_destino)'
         elif timestamp and importe_nominal and search == 'lower':
             sel = 'min(nearest_lower_importe({}, importe_nominal))'.format(importe_nominal)
@@ -352,15 +260,22 @@ class CassandraLogic:
         if competidor:
             query += "AND competidor='{}' ".format(competidor)
 
+        if year and month and day:
+            query += "AND year={} AND month={} AND day={} ".format(year, month, day)
+
         # If max importe destino (used in range of timestamps).
         if importe_destino:
-            # If we besides specify a importe_nominal.
             if importe_nominal:
                 query += "AND importe_nominal={} ".format(importe_nominal)
             query += "AND importe_destino={} ".format(importe_destino)
 
         if importe_nominal and (not search or search == 'approx'):  # Second step, when an exact importe nominal does not exist.
             query += "AND importe_nominal={} ".format(importe_nominal)
+
+        if range_importe_nominal:
+            min_importe = range_importe_nominal[0]
+            max_importe = range_importe_nominal[1]
+            query += "AND importe_nominal < {} AND importe_nominal > {} ".format(max_importe, min_importe)
 
         if timestamp:
             max_ts = timestamp[0]
@@ -371,6 +286,7 @@ class CassandraLogic:
             min_geohash = geohash[1]
             query += "AND geohash < '{}' AND geohash > '{}' ".format(max_geohash, min_geohash)
 
+        print(query)
         query += "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
 
@@ -384,75 +300,27 @@ class CassandraLogic:
         if not rows or rows[0][0] == 'None':
             rows = []
 
-        if timestamp and not importe_destino and rows and not search:
-            rows = self._best_tasa_specific_importe(alt_table, pais_destino, divisa,
+        if timestamp and not importe_destino and not importe_nominal:
+            rows = self.best_tasa(alt_table, pais_destino, divisa,
                                   ciudad=ciudad,
+                                  competidor=competidor,
+                                  importe_destino=rows[0][0],
+                                  timestamp=timestamp,
+                                  mostrar=10)
+
+        elif timestamp and not importe_destino and importe_nominal and rows and not search:
+            rows = self.best_tasa(alt_table, pais_destino, divisa,
+                                  ciudad=ciudad,
+                                  competidor=competidor,
                                   importe_destino=rows[0][0],
                                   importe_nominal=importe_nominal,
                                   timestamp=timestamp,
                                   search='best_tasa',
                                   mostrar=10)
-        return rows
-
-    def _best_tasa_range_importe(self, table_name, pais_destino, divisa,
-                                    ciudad=None,
-                                    num_agente=None,
-                                    competidor=None,
-                                    importe_destino=None,
-                                    range_importe_nominal=None,
-                                    year=None,
-                                    month=None,
-                                    day=None,
-                                    alt_table=None,
-                                    mostrar=10):
-        # If query data is between two timestamps, we need a trick to retrieve the row.
-        if range_importe_nominal and not importe_destino:
-            sel = 'max(importe_destino)'
-        else:
-            sel = '*'
-
-        query = "SELECT {} FROM {} ".format(sel, table_name)
-        query += "WHERE pais_destino='{}' ".format(pais_destino)
-
-        # We search by a) ciudad b) num_agente c) proximity coordinates (later).
-        if ciudad:
-            query += "AND ciudad='{}' ".format(ciudad)
-        elif num_agente:
-            query += "AND num_agente={} ".format(num_agente)
-
-        query += "AND divisa='{}' ".format(divisa)
-
-        if year and month and day:
-            query += "AND year={} AND month={} AND day={} ".format(year, month, day)
-
-        # If concrete competidor specified:
-        if competidor:
-            query += "AND competidor='{}' ".format(competidor)
-
-        if importe_destino:
-            query += "AND importe_destino={} ".format(importe_destino)
-
-        if range_importe_nominal:
-            min_importe = range_importe_nominal[0]
-            max_importe = range_importe_nominal[1]
-            query += "AND importe_nominal < {} AND importe_nominal > {} ".format(max_importe, min_importe)
-
-        query += "LIMIT {}".format(mostrar)
-        results = self.session.execute(query)
-
-        rows = []
-        for res in results:
-            row = []
-            for r in res:
-                row.append(str(r))
-            rows.append(row)
-
-        if not rows or rows[0][0] == 'None':
-            rows = []
-
-        if range_importe_nominal and not importe_destino and rows:
-            rows = self._best_tasa_range_importe(alt_table, pais_destino, divisa,
+        elif range_importe_nominal and not importe_destino and rows:
+            rows = self.best_tasa(alt_table, pais_destino, divisa,
                                                     ciudad=ciudad,
+                                                    competidor=competidor,
                                                     importe_destino=rows[0][0],
                                                     range_importe_nominal=range_importe_nominal,
                                                     year=year,

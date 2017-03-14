@@ -1,9 +1,11 @@
 class Table:
 
+    # QUERIES SETTING CIUDAD.
+
+    # QUERY WITHOUT RESTRICTIONS.
+    # For all competitors.
     @staticmethod
     def table_ciudad_scheme(attributes):
-
-
         table_name = "ciudad_query"
         table_query = "CREATE TABLE " + table_name + "("  \
                       + attributes \
@@ -11,6 +13,7 @@ class Table:
                         "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_destino DESC, competidor DESC);"
         return table_query
 
+    # For one competitor.
     @staticmethod
     def table_ciudad_competidor_scheme(attributes):
         table_name = "ciudad_competidor_query"
@@ -20,7 +23,9 @@ class Table:
                                "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_destino DESC);"
         return table_query
 
+    # QUERY WITH TIMESTAMP RANGE.
     @staticmethod
+    # For all competitors.
     def table_ciudad_timestamp_importe_scheme(attributes):
         table_name = "ciudad_timestamp_importe_query"
         table_query = "CREATE TABLE " + table_name + "(" \
@@ -38,6 +43,7 @@ class Table:
                         "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_destino DESC, timestamp DESC, competidor DESC);"
         return table_query
 
+    # For one competitor.
     @staticmethod
     def table_ciudad_competidor_timestamp_scheme(attributes):
         table_name = "ciudad_competidor_timestamp_query"
@@ -56,7 +62,10 @@ class Table:
                         "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_destino DESC, timestamp DESC);"
         return table_query
 
+
+    # QUERY WITH EXACT IMPORTE.
     @staticmethod
+    # For all competitors.
     def table_ciudad_importe_nominal_timestamp_scheme(attributes):
         table_name = "ciudad_importe_nominal_timestamp_query"
         table_query = "CREATE TABLE " + table_name + "(" \
@@ -84,6 +93,38 @@ class Table:
                         "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, timestamp DESC, importe_nominal DESC, competidor DESC);"
         return table_query
 
+    # For one competitor.
+    @staticmethod
+    def table_ciudad_competidor_importe_nominal_ts_scheme(attributes):
+        table_name = "ciudad_competidor_importe_nominal_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_nominal, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_nominal DESC, timestamp DESC);"
+        return table_query
+
+    @staticmethod
+    def table_ciudad_competidor_importes_ts_scheme(attributes):
+        table_name = "ciudad_competidor_importes_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_nominal, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+
+    @staticmethod
+    def table_ciudad_competidor_ts_importe_nominal_scheme(attributes):
+        table_name = "ciudad_competidor_ts_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, timestamp, importe_nominal) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, timestamp DESC, importe_nominal DESC);"
+        return table_query
+
+
+    # QUERY WITH RANGE IMPORTE.
+    # For all competitors.
     @staticmethod
     def table_ciudad_fecha_importe_nominal_scheme(attributes):
         table_name = "ciudad_fecha_importe_nominal_query"
@@ -102,6 +143,27 @@ class Table:
                         "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, year DESC, month DESC, day DESC, importe_destino DESC, importe_nominal DESC, timestamp DESC);"
         return table_query
 
+    # For one competitor.
+    @staticmethod
+    def table_ciudad_competidor_fecha_importe_nominal_scheme(attributes):
+        table_name = "ciudad_competidor_fecha_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, year, month, day, importe_nominal, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+    @staticmethod
+    def table_ciudad_competidor_fecha_importe_destino_scheme(attributes):
+        table_name = "ciudad_competidor_fecha_importe_destino_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, year, month, day, importe_destino, importe_nominal, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_destino DESC, importe_nominal DESC, timestamp DESC);"
+        return table_query
+
+
+    # QUERIES SETTING GEOPOSITION.
     @staticmethod
     def table_geohash_scheme(attributes):
         table_name = "geohash_query"
@@ -124,6 +186,8 @@ class Table:
 
         return table_query
 
+
+    # QUERIES SETTING AGENTE.
     @staticmethod
     def table_agente_scheme(attributes):
         table_name = "agente_query"
