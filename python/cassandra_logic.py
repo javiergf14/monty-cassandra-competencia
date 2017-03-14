@@ -207,10 +207,8 @@ class CassandraLogic:
                   alt_table=None,
                   mostrar=10):
 
-        # If query data between two timestamps, we need a trick to retrieve the row.
-        if timestamp and not importe_destino and importe_nominal and not search:
-            sel = 'max(importe_destino)'
-        elif timestamp and not importe_destino and not importe_nominal:
+        # If query data is between two timestamps, we need a trick to retrieve the row.
+        if timestamp and not importe_destino and not search:
             sel = 'max(importe_destino)'
         elif timestamp and importe_nominal and search=='lower':
             sel = 'min(nearest_lower_importe({}, importe_nominal))'.format(importe_nominal)
@@ -222,6 +220,7 @@ class CassandraLogic:
         query = "SELECT {} FROM {} ".format(sel, table_name)
         query += "WHERE pais_destino='{}' ".format(pais_destino)
 
+        # We search by a) ciudad b) num_agente c) proximity coordinates (later).
         if ciudad:
             query += "AND ciudad='{}' ".format(ciudad)
         elif num_agente:
@@ -229,10 +228,13 @@ class CassandraLogic:
 
         query += "AND divisa='{}' ".format(divisa)
 
+        # If concrete competidor specified:
         if competidor:
             query += "AND competidor='{}' ".format(competidor)
 
+        # If max importe destino (used in range of timestamps).
         if importe_destino:
+            # If we besides specify a importe_nominal.
             if importe_nominal:
                 query += "AND importe_nominal={} ".format(importe_nominal)
             query += "AND importe_destino={} ".format(importe_destino)
@@ -279,4 +281,30 @@ class CassandraLogic:
                                      search='best_tasa',
                                      mostrar=10)
         return rows
+
+
+        def _best_tasa_no_restriction_importe(self, table_name, pais_destino, divisa,
+                  ciudad=None,
+                  num_agente=None,
+                  geohash = None,
+                  timestamp = None,
+                  competidor=None,
+                  importe_destino=None,
+                  importe_nominal=None,
+                  search=None,
+                  alt_table=None,
+                  mostrar=10):
+            
+        def _best_tasa_specific_importe(self, table_name, pais_destino, divisa,
+                  ciudad=None,
+                  num_agente=None,
+                  geohash = None,
+                  timestamp = None,
+                  competidor=None,
+                  importe_destino=None,
+                  importe_nominal=None,
+                  search=None,
+                  alt_table=None,
+                  mostrar=10)
+
 

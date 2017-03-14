@@ -123,13 +123,18 @@ def query1_result():
     lower_value = 0
 
     if competidor == 'Todos': # All the competitors
-        if timestamp: # Timestamp range
+
+        # Timestamp range
+        if timestamp:
+
+            # All the importes.
             if importe_nominal == 'Cualquiera':
                 results = cassandra.best_tasa('ciudad_timestamp_importe_query', pais_destino, divisa,
                                                 ciudad=ciudad,
                                                 timestamp=timestamp,
                                                 alt_table='ciudad_importe_timestamp_query',
                                                 mostrar=mostrar)
+            # Exact importe.
             else:
                 results = cassandra.best_tasa('ciudad_importe_nominal_timestamp_query', pais_destino, divisa,
                                                 ciudad=ciudad,
@@ -137,14 +142,14 @@ def query1_result():
                                                 importe_nominal=importe_nominal,
                                                 alt_table='ciudad_importe_nominal_y_destino_timestamp_query',
                                                 mostrar=mostrar)
-                if not results: # Get best tasa inferior y superior.
+                # If exact importe does not exist, take the upper importe and the lower importe.
+                if not results:
                     lower_value = cassandra.best_tasa('ciudad_timestamp_importe_nominal_query', pais_destino, divisa,
                                                 ciudad=ciudad,
                                                 timestamp=timestamp,
                                                 importe_nominal=importe_nominal,
                                                 search='lower',
                                                 mostrar=mostrar)
-
 
                     upper_value = cassandra.best_tasa('ciudad_timestamp_importe_nominal_query', pais_destino, divisa,
                                                       ciudad=ciudad,
@@ -170,18 +175,21 @@ def query1_result():
                                                         importe_nominal=upper_value,
                                                         search='pe',
                                                         mostrar=mostrar)
-
+        # No timestamp range
         else:
             results = cassandra.best_tasa('ciudad_query', pais_destino, divisa,
                                           ciudad=ciudad,
                                           mostrar=mostrar)
     else: # Specific competitor
-        if timestamp: # Timestamp range
+
+        # Timestamp range
+        if timestamp:
             results = cassandra.best_tasa('ciudad_competidor_timestamp_query', pais_destino, divisa,
                                           ciudad=ciudad,
                                           timestamp=timestamp,
                                           alt_table='ciudad_competidor_importe_timestamp_query',
                                           mostrar=mostrar)
+        # No timestamp range.
         else:
             results = cassandra.best_tasa('ciudad_competidor_query', pais_destino, divisa,
                                           ciudad=ciudad,
