@@ -42,7 +42,8 @@ class CassandraLogic:
           "ciudad_timestamp_importe_query": Table.table_ciudad_timestamp_importe_scheme(),
           "ciudad_importe_timestamp_query": Table.table_ciudad_importe_timestamp_scheme(),
           "ciudad_competidor_timestamp_query": Table.table_ciudad_competidor_timestamp_scheme(),
-          "ciudad_competidor_importe_timestamp_query": Table.table_ciudad_competidor_importe_timestamp_scheme()
+          "ciudad_competidor_importe_timestamp_query": Table.table_ciudad_competidor_importe_timestamp_scheme(),
+          "ciudad_timestamp_importe_nominal_query": Table.table_ciudad_timestamp_importe_nominal_scheme()
           }
 
         # Connect the application to the Cassandra cluster
@@ -102,7 +103,7 @@ class CassandraLogic:
 
     def insert_into_all_tables(self, data):
         column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision",
-                        "tasa_cambio", "timestamp", "lat", "lon", "num_agente"]
+                        "tasa_cambio", "timestamp", "lat", "lon", "num_agente", "importe_nominal"]
         column_values = []
         for i in column_names:
             column_values.append(data[i])

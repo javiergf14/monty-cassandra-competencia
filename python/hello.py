@@ -32,6 +32,7 @@ def busqueda():
     rows_query1 = cassandra.select_all('ciudad_query')
     rows_query3 = cassandra.select_all('geohash_query')
     rows_query5 = cassandra.select_all('agente_query')
+    rows_query7 = cassandra.select_all('ciudad_timestamp_importe_nominal_query')
     return render_template('busqueda.html', **locals())
 
 
@@ -58,7 +59,7 @@ def insertar_result():
     ciudad = request.args.get('ciudad')
     competidor = request.args.get('competidor')
     divisa = request.args.get('divisa')
-    importe = request.args.get('importe')
+    importe_nominal = request.args.get('importeNominal')
     modo_entrega = request.args.get('modoEntrega')
     canal_captacion = request.args.get('canalCaptacion')
     usuario = request.args.get('usuario')
@@ -77,7 +78,7 @@ def insertar_result():
             "ciudad": ciudad,
             "competidor": competidor,
             "divisa": divisa,
-            "importe": importe,
+            "importe_nominal": importe_nominal,
             "modo_entrega": modo_entrega,
             "canal_captacion": canal_captacion,
             "usuario": usuario,

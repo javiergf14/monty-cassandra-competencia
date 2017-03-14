@@ -41,7 +41,7 @@
 	Codigo postal: <input type="text" name="CodigoPostal" id="CodigoPostal"><br>
 	Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
 	Divisa: <input type="text" name="Divisa" id="Divisa"><br>
-	Importe: <input type="text" name="Importe" id="Importe"><br>
+	Importe Nominal: <input type="text" name="ImporteNominal" id="ImporteNominal"><br>
 	Modo Entrega: <input type="text" name="ModoEntrega" id="ModoEntrega"><br>
 	Canal Captacion: <input type="text" name="CanalCaptacion" id="CanalCaptacion" value="Movil"><br>
 	Usuario: <input type="text" name="Usuario" id="Usuario" value="Javier"><br>
@@ -61,7 +61,7 @@ function sendURL(){
 		var codigoPostal = document.getElementById('CodigoPostal').value;
 		var paisDestino = document.getElementById('PaisDestino').value;
 		var divisa = document.getElementById('Divisa').value;
-		var importe = document.getElementById('Importe').value;
+		var importeNominal = document.getElementById('ImporteNominal').value;
 		var modoEntrega = document.getElementById('ModoEntrega').value;
 		var canalCaptacion = document.getElementById('CanalCaptacion').value;
 		var usuario = document.getElementById('Usuario').value;
@@ -72,7 +72,7 @@ function sendURL(){
 		var numAgente = document.getElementById('NumAgente').value;
 		
 		var url = '/competencia/insertar_result?competidor='+competidor+'&pais='+pais+'&ciudad='+ciudad+'&codigoPostal='+codigoPostal+'&paisDestino='+paisDestino
-				+'&divisa='+divisa+'&importe='+importe+'&modoEntrega='+modoEntrega+'&canalCaptacion='+canalCaptacion+'&usuario='+usuario+'&comision='+comision
+				+'&divisa='+divisa+'&importeNominal='+importeNominal+'&modoEntrega='+modoEntrega+'&canalCaptacion='+canalCaptacion+'&usuario='+usuario+'&comision='+comision
 				+'&tasaCambio='+tasaCambio+'&lat='+lat+'&lon='+lon+'&numAgente='+numAgente;
         window.location.href=url;
 }	
