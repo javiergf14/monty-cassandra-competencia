@@ -110,19 +110,67 @@ def query1_result():
     mostrar = request.args.get('mostrar')
     min_ts = request.args.get('minTS')
     max_ts = request.args.get('maxTS')
+    importe_nominal = request.args.get('importeNominal')
 
     timestamp = []
     if max_ts != '' and min_ts != '':
         timestamp = [max_ts, min_ts]
 
     results = []
+    upper_tasa = []
+    upper_value = 0
+    lower_tasa = []
+    lower_value = 0
+
     if competidor == 'Todos': # All the competitors
         if timestamp: # Timestamp range
-            results = cassandra.best_tasa('ciudad_timestamp_importe_query', pais_destino, divisa,
-                                            ciudad=ciudad,
-                                            timestamp=timestamp,
-                                            alt_table='ciudad_importe_timestamp_query',
-                                            mostrar=mostrar)
+            if importe_nominal == 'Cualquiera':
+                results = cassandra.best_tasa('ciudad_timestamp_importe_query', pais_destino, divisa,
+                                                ciudad=ciudad,
+                                                timestamp=timestamp,
+                                                alt_table='ciudad_importe_timestamp_query',
+                                                mostrar=mostrar)
+            else:
+                results = cassandra.best_tasa('ciudad_importe_nominal_timestamp_query', pais_destino, divisa,
+                                                ciudad=ciudad,
+                                                timestamp=timestamp,
+                                                importe_nominal=importe_nominal,
+                                                alt_table='ciudad_importe_nominal_y_destino_timestamp_query',
+                                                mostrar=mostrar)
+                if not results: # Get best tasa inferior y superior.
+                    lower_value = cassandra.best_tasa('ciudad_timestamp_importe_nominal_query', pais_destino, divisa,
+                                                ciudad=ciudad,
+                                                timestamp=timestamp,
+                                                importe_nominal=importe_nominal,
+                                                search='lower',
+                                                mostrar=mostrar)
+
+
+                    upper_value = cassandra.best_tasa('ciudad_timestamp_importe_nominal_query', pais_destino, divisa,
+                                                      ciudad=ciudad,
+                                                      timestamp=timestamp,
+                                                      importe_nominal=importe_nominal,
+                                                      search='upper',
+                                                      mostrar=mostrar)
+                    if lower_value:
+                        lower_value = float(str(importe_nominal)) - float(lower_value[0][0])
+                        print('im here')
+                        lower_tasa = cassandra.best_tasa('ciudad_importe_nominal_timestamp_query', pais_destino, divisa,
+                                                    ciudad=ciudad,
+                                                    timestamp=timestamp,
+                                                    importe_nominal=lower_value,
+                                                    search='pe',
+                                                    mostrar=mostrar)
+
+                    if upper_value:
+                        upper_value = float(str(importe_nominal)) + float(upper_value[0][0])
+                        upper_tasa = cassandra.best_tasa('ciudad_importe_nominal_timestamp_query', pais_destino, divisa,
+                                                        ciudad=ciudad,
+                                                        timestamp=timestamp,
+                                                        importe_nominal=upper_value,
+                                                        search='pe',
+                                                        mostrar=mostrar)
+
         else:
             results = cassandra.best_tasa('ciudad_query', pais_destino, divisa,
                                           ciudad=ciudad,

@@ -43,7 +43,9 @@ class CassandraLogic:
           "ciudad_importe_timestamp_query": Table.table_ciudad_importe_timestamp_scheme(),
           "ciudad_competidor_timestamp_query": Table.table_ciudad_competidor_timestamp_scheme(),
           "ciudad_competidor_importe_timestamp_query": Table.table_ciudad_competidor_importe_timestamp_scheme(),
-          "ciudad_timestamp_importe_nominal_query": Table.table_ciudad_timestamp_importe_nominal_scheme()
+          "ciudad_importe_nominal_timestamp_query": Table.table_ciudad_importe_nominal_timestamp_scheme(),
+          "ciudad_timestamp_importe_nominal_query": Table.table_ciudad_timestamp_importe_nominal_scheme(),
+          "ciudad_importe_nominal_y_destino_timestamp_query": Table.table_ciudad_importe_nominal_y_destino_timestamp_scheme()
           }
 
         # Connect the application to the Cassandra cluster
@@ -92,7 +94,7 @@ class CassandraLogic:
            Args:
                table_name (str): name of the table.
         """
-
+        self._create_functions()
         for table_name, table_query in self.tables.items():
             print(self.tables[table_name])
             try:
@@ -100,6 +102,38 @@ class CassandraLogic:
                 self.session.execute(table_query)
             except:
                 self.session.execute(table_query)
+
+    def _create_functions(self):
+        """Create User Defined Functions
+        """
+
+        self.session.execute("""
+            CREATE FUNCTION nearest_lower_importe(importe_user double, importe_nominal double)
+            RETURNS NULL ON NULL INPUT
+            RETURNS double
+            LANGUAGE java
+            AS '
+            if(importe_nominal > importe_user){
+                return 10000000.0;
+            }
+            else{
+                return importe_user-importe_nominal;
+            }'
+        """)
+
+        self.session.execute("""
+            CREATE FUNCTION nearest_upper_importe(importe_user double, importe_nominal double)
+            RETURNS NULL ON NULL INPUT
+            RETURNS double
+            LANGUAGE java
+            AS '
+            if(importe_nominal < importe_user){
+                return 10000000.0;
+            }
+            else{
+                return importe_nominal-importe_user;
+            }'
+        """)
 
     def insert_into_all_tables(self, data):
         column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision",
@@ -168,11 +202,23 @@ class CassandraLogic:
                   timestamp = None,
                   competidor=None,
                   importe_destino=None,
+                  importe_nominal=None,
+                  search=None,
                   alt_table=None,
                   mostrar=10):
 
         # If query data between two timestamps, we need a trick to retrieve the row.
-        sel = 'max(importe_destino)' if timestamp and not importe_destino else '*'
+        if timestamp and not importe_destino and importe_nominal and not search:
+            sel = 'max(importe_destino)'
+        elif timestamp and not importe_destino and not importe_nominal:
+            sel = 'max(importe_destino)'
+        elif timestamp and importe_nominal and search=='lower':
+            sel = 'min(nearest_lower_importe({}, importe_nominal))'.format(importe_nominal)
+        elif timestamp and importe_nominal and search=='upper':
+            sel = 'min(nearest_upper_importe({}, importe_nominal))'.format(importe_nominal)
+        else:
+            sel = '*'
+
         query = "SELECT {} FROM {} ".format(sel, table_name)
         query += "WHERE pais_destino='{}' ".format(pais_destino)
 
@@ -187,7 +233,12 @@ class CassandraLogic:
             query += "AND competidor='{}' ".format(competidor)
 
         if importe_destino:
+            if importe_nominal:
+                query += "AND importe_nominal={} ".format(importe_nominal)
             query += "AND importe_destino={} ".format(importe_destino)
+
+        if importe_nominal and (not search or search=='pe'): # Second step, when an exact importe nominal does not exist.
+            query += "AND importe_nominal={} ".format(importe_nominal)
 
         if timestamp:
             max_ts = timestamp[0]
@@ -200,6 +251,7 @@ class CassandraLogic:
 
         query += "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
+
         rows = []
         for res in results:
             row = []
@@ -207,11 +259,24 @@ class CassandraLogic:
                 row.append(str(r))
             rows.append(row)
 
-        if timestamp and not importe_destino:
+        if not rows or rows[0][0]=='None':
+            rows = []
+
+        if timestamp and not importe_destino and not importe_nominal:
             rows = self.best_tasa(alt_table, pais_destino, divisa,
                                      ciudad=ciudad,
                                      importe_destino=rows[0][0],
                                      timestamp=timestamp,
+                                     mostrar=10)
+
+        elif timestamp and not importe_destino and importe_nominal and rows and not search:
+                        #search!='lower' and search!='upper' and search!='pe':
+            rows = self.best_tasa(alt_table, pais_destino, divisa,
+                                     ciudad=ciudad,
+                                     importe_destino=rows[0][0],
+                                     importe_nominal=importe_nominal,
+                                     timestamp=timestamp,
+                                     search='best_tasa',
                                      mostrar=10)
         return rows
 

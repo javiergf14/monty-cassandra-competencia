@@ -40,6 +40,7 @@
     Divisa: <input type="text" name="Divisa" id="Divisa"><br>
 	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
 	Fecha entre: <input type="text" name="minTS" id="minTS"> y <input type="text" name="maxTS" id="maxTS"><br>
+	Importe nominal: <input type="text" name="ImporteNominal" id="ImporteNominal" value="Cualquiera"><br>
 	Mostrar: <input type="text" name="Mostrar" id="Mostrar" value="10"> mejores <br>
 	<button onclick="sendURL();">Enviar</button>
 </body>
@@ -51,10 +52,11 @@ function sendURL(){
         var competidor = document.getElementById('Competidor').value;
         var minTS = document.getElementById('minTS').value;
         var maxTS = document.getElementById('maxTS').value;
+        var importeNominal = document.getElementById('ImporteNominal').value;
         var mostrar =  document.getElementById('Mostrar').value;
 
 		var url = '/competencia/query1_result?ciudad='+ciudad+'&paisDestino='+paisDestino+'&divisa='
-			+divisa+'&competidor='+competidor+'&mostrar='+mostrar+'&minTS='+minTS+'&maxTS='+maxTS;
+			+divisa+'&competidor='+competidor+'&mostrar='+mostrar+'&minTS='+minTS+'&maxTS='+maxTS+'&importeNominal='+importeNominal;
         window.location.href=url;
 }	
 </script>

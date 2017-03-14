@@ -121,6 +121,49 @@ class Table:
         return table_query
 
     @staticmethod
+    def table_ciudad_importe_nominal_timestamp_scheme():
+        table_name = "ciudad_importe_nominal_timestamp_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + "pais_destino text, " \
+                      + "ciudad text, " \
+                      + "divisa text, " \
+                      + "importe_nominal double," \
+                      + "timestamp double, " \
+                      + "competidor text, " \
+                      + "importe_destino double, " \
+                      + "comision double, " \
+                      + "tasa_cambio double, " \
+                      + "lat double, " \
+                      + "lon double, " \
+                      + "num_agente int," \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_nominal, timestamp, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_nominal DESC, timestamp DESC, competidor DESC);"
+        return table_query
+
+    @staticmethod
+    def table_ciudad_importe_nominal_y_destino_timestamp_scheme():
+        table_name = "ciudad_importe_nominal_y_destino_timestamp_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + "pais_destino text, " \
+                      + "ciudad text, " \
+                      + "divisa text, " \
+                      + "importe_nominal double," \
+                      + "importe_destino double, " \
+                      + "timestamp double, " \
+                      + "competidor text, " \
+                      + "comision double, " \
+                      + "tasa_cambio double, " \
+                      + "lat double, " \
+                      + "lon double, " \
+                      + "num_agente int," \
+                      + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_nominal, importe_destino, timestamp, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC, competidor DESC);"
+        return table_query
+
+
+
+
+    @staticmethod
     def table_ciudad_timestamp_importe_nominal_scheme():
         table_name = "ciudad_timestamp_importe_nominal_query"
         table_query = "CREATE TABLE " + table_name + "(" \
