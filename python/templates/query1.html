@@ -39,8 +39,10 @@
     Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
     Divisa: <input type="text" name="Divisa" id="Divisa"><br>
 	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
-	Fecha entre: <input type="text" name="minTS" id="minTS"> y <input type="text" name="maxTS" id="maxTS"><br>
-	Importe nominal: <input type="text" name="ImporteNominal" id="ImporteNominal" value="Cualquiera"><br>
+	Timestamp entre: <input type="text" name="minTS" id="minTS"> y <input type="text" name="maxTS" id="maxTS"><br>
+	Fecha entre (dd/mm/yyyy): <input type="text" name="MinDate" id="MinDate"> y <input type="text" name="MaxDate" id="MaxDate"><br>
+	Importe nominal: <input type="text" name="ImporteNominal" id="ImporteNominal" value="Cualquiera">
+		o rango importe: <input type="text" name="MinRangeImporteNominal" id="MinRangeImporteNominal"> hasta  <input type="text" name="MaxRangeImporteNominal" id="MaxRangeImporteNominal"> <br>
 	Mostrar: <input type="text" name="Mostrar" id="Mostrar" value="10"> mejores <br>
 	<button onclick="sendURL();">Enviar</button>
 </body>
@@ -54,9 +56,15 @@ function sendURL(){
         var maxTS = document.getElementById('maxTS').value;
         var importeNominal = document.getElementById('ImporteNominal').value;
         var mostrar =  document.getElementById('Mostrar').value;
+        var minDate = document.getElementById('MinDate').value;
+		var maxDate = document.getElementById('MaxDate').value;
+		var minRangeImporteNominal = document.getElementById('MinRangeImporteNominal').value;
+		var maxRangeImporteNominal = document.getElementById('MaxRangeImporteNominal').value;
 
 		var url = '/competencia/query1_result?ciudad='+ciudad+'&paisDestino='+paisDestino+'&divisa='
-			+divisa+'&competidor='+competidor+'&mostrar='+mostrar+'&minTS='+minTS+'&maxTS='+maxTS+'&importeNominal='+importeNominal;
+			+divisa+'&competidor='+competidor+'&mostrar='+mostrar+'&minTS='+minTS+'&maxTS='+maxTS+'&importeNominal='
+			+importeNominal+'&minDate='+minDate+'&maxDate='+maxDate+'&minRangeImporteNominal='+minRangeImporteNominal
+			+'&maxRangeImporteNominal='+maxRangeImporteNominal;
         window.location.href=url;
 }	
 </script>

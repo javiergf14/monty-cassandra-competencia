@@ -1,6 +1,8 @@
 from cassandra_logic import CassandraLogic
 from flask import Flask, render_template, request
 from utils.geolocation import GeoLocation
+from datetime import date, timedelta as td
+from collections import OrderedDict
 import Geohash
 
 import time
@@ -69,6 +71,9 @@ def insertar_result():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
     num_agente = request.args.get('numAgente')
+    day =  request.args.get('day')
+    month = request.args.get('month')
+    year = request.args.get('year')
 
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
@@ -87,7 +92,10 @@ def insertar_result():
             "tasa_cambio": tasa_cambio,
             "lat": lat,
             "lon": lon,
-            "num_agente": num_agente
+            "num_agente": num_agente,
+            "day": day,
+            "month": month,
+            "year": year
             }
 
     cassandra.insert_into_all_tables(data)
@@ -111,6 +119,22 @@ def query1_result():
     min_ts = request.args.get('minTS')
     max_ts = request.args.get('maxTS')
     importe_nominal = request.args.get('importeNominal')
+    min_date = request.args.get('minDate')
+    max_date = request.args.get('maxDate')
+    min_range_importe_nominal = request.args.get('minRangeImporteNominal')
+    max_range_importe_nominal = request.args.get('maxRangeImporteNominal')
+
+
+    if min_date != '' and max_date != '':
+        min_date = min_date.split("/")
+        max_date = max_date.split("/")
+
+        min_date = [int(i) for i in min_date]
+        max_date = [int(i) for i in max_date]
+
+    range_importe_nominal = []
+    if min_range_importe_nominal != '' and max_range_importe_nominal != '':
+        range_importe_nominal = [int(min_range_importe_nominal), int(max_range_importe_nominal)]
 
     timestamp = []
     if max_ts != '' and min_ts != '':
@@ -123,9 +147,32 @@ def query1_result():
     lower_value = 0
 
     if competidor == 'Todos': # All the competitors
+        # Fecha range.
+        if min_date and max_date and range_importe_nominal:
+            candidate_solutions = dict()
+
+            date1 = date(min_date[2], min_date[1], min_date[0])
+            date2 = date(max_date[2], max_date[1], max_date[0])
+
+            delta = date2 - date1
+            for i in range(delta.days+1):
+                fecha = date1+td(days=i)
+                results = cassandra._best_tasa_range_importe("ciudad_fecha_importe_nominal_query", pais_destino, divisa,
+                                                             ciudad=ciudad,
+                                                             range_importe_nominal=range_importe_nominal,
+                                                             year=fecha.year,
+                                                             month=fecha.month,
+                                                             day=fecha.day,
+                                                             alt_table="ciudad_fecha_importe_destino_query")
+                if results:
+                    candidate_solutions[results[0][6]] = results
+
+            sorted_candidates = OrderedDict(sorted(candidate_solutions.items(), key=lambda t: t[0], reverse=True))
+            results = sorted_candidates.items()[0]
+
 
         # Timestamp range
-        if timestamp:
+        elif timestamp:
 
             # All the importes.
             if importe_nominal == 'Cualquiera':
@@ -159,12 +206,11 @@ def query1_result():
                                                       mostrar=mostrar)
                     if lower_value:
                         lower_value = float(str(importe_nominal)) - float(lower_value[0][0])
-                        print('im here')
                         lower_tasa = cassandra.best_tasa('ciudad_importe_nominal_timestamp_query', pais_destino, divisa,
                                                     ciudad=ciudad,
                                                     timestamp=timestamp,
                                                     importe_nominal=lower_value,
-                                                    search='pe',
+                                                    search='approx',
                                                     mostrar=mostrar)
 
                     if upper_value:
@@ -173,7 +219,7 @@ def query1_result():
                                                         ciudad=ciudad,
                                                         timestamp=timestamp,
                                                         importe_nominal=upper_value,
-                                                        search='pe',
+                                                        search='approx',
                                                         mostrar=mostrar)
         # No timestamp range
         else:

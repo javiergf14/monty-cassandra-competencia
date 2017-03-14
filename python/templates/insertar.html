@@ -50,6 +50,11 @@
 	Lat: <input type="text" name="Lat" id="Lat"><br>
 	Lon: <input type="text" name="Lon" id="Lon"><br>
 	Numero agente: <input type="text" name="NumAgente" id="NumAgente"><br>
+	Day: <input type="text" name="Day" id="Day"><br>
+	Month: <input type="text" name="Month" id="Month" value="3"><br>
+	Year: <input type="text" name="Year" id="Year" value="2017"><br>
+
+
 
 	<button onclick="sendURL();">Enviar</button>
 </body>
@@ -70,10 +75,13 @@ function sendURL(){
 		var lat = document.getElementById('Lat').value;
 		var lon = document.getElementById('Lon').value;
 		var numAgente = document.getElementById('NumAgente').value;
+		var day = document.getElementById('Day').value;
+		var month = document.getElementById('Month').value;
+		var year = document.getElementById('Year').value;
 		
 		var url = '/competencia/insertar_result?competidor='+competidor+'&pais='+pais+'&ciudad='+ciudad+'&codigoPostal='+codigoPostal+'&paisDestino='+paisDestino
 				+'&divisa='+divisa+'&importeNominal='+importeNominal+'&modoEntrega='+modoEntrega+'&canalCaptacion='+canalCaptacion+'&usuario='+usuario+'&comision='+comision
-				+'&tasaCambio='+tasaCambio+'&lat='+lat+'&lon='+lon+'&numAgente='+numAgente;
+				+'&tasaCambio='+tasaCambio+'&lat='+lat+'&lon='+lon+'&numAgente='+numAgente+'&day='+day+'&month='+month+'&year='+year;
         window.location.href=url;
 }	
 </script>
