@@ -50,26 +50,45 @@ class CassandraLogic:
                           + "year int, "
 
         self.tables = {
-          "ciudad_query": Table.table_ciudad_scheme(self.attributes),
-          "ciudad_competidor_query": Table.table_ciudad_competidor_scheme(self.attributes),
-          "geohash_query": Table.table_geohash_scheme(self.attributes),
-          "geohash_competidor_query": Table.table_geohash_competidor_scheme(self.attributes),
-          "agente_query": Table.table_agente_scheme(self.attributes),
-          "agente_competidor_query": Table.table_agente_competidor_scheme(self.attributes),
-          "ciudad_timestamp_importe_query": Table.table_ciudad_timestamp_importe_scheme(self.attributes),
-          "ciudad_importe_timestamp_query": Table.table_ciudad_importe_timestamp_scheme(self.attributes),
-          "ciudad_competidor_timestamp_query": Table.table_ciudad_competidor_timestamp_scheme(self.attributes),
-          "ciudad_competidor_importe_timestamp_query": Table.table_ciudad_competidor_importe_timestamp_scheme(self.attributes),
-          "ciudad_importe_nominal_timestamp_query": Table.table_ciudad_importe_nominal_timestamp_scheme(self.attributes),
-          "ciudad_timestamp_importe_nominal_query": Table.table_ciudad_timestamp_importe_nominal_scheme(self.attributes),
-          "ciudad_importe_nominal_y_destino_timestamp_query": Table.table_ciudad_importe_nominal_y_destino_timestamp_scheme(self.attributes),
-          "ciudad_fecha_importe_nominal_query": Table.table_ciudad_fecha_importe_nominal_scheme(self.attributes),
-          "ciudad_fecha_importe_destino_query": Table.table_ciudad_fecha_importe_destino_scheme(self.attributes),
-          "ciudad_competidor_importe_nominal_ts_query": Table.table_ciudad_competidor_importe_nominal_ts_scheme(self.attributes),
-          "ciudad_competidor_importes_ts_query": Table.table_ciudad_competidor_importes_ts_scheme(self.attributes),
-          "ciudad_competidor_ts_importe_nominal_query": Table.table_ciudad_competidor_ts_importe_nominal_scheme(self.attributes),
-          "ciudad_competidor_fecha_importe_nominal_query": Table.table_ciudad_competidor_fecha_importe_nominal_scheme(self.attributes),
-          "ciudad_competidor_fecha_importe_destino_query": Table.table_ciudad_competidor_fecha_importe_destino_scheme(self.attributes)
+            "ciudad_query": Table.table_ciudad_scheme(self.attributes),
+            "ciudad_competidor_query": Table.table_ciudad_competidor_scheme(self.attributes),
+            "geohash_query": Table.table_geohash_scheme(self.attributes),
+            "geohash_competidor_query": Table.table_geohash_competidor_scheme(self.attributes),
+            "ciudad_ts_importe_query": Table.table_ciudad_ts_importe_scheme(self.attributes),
+            "ciudad_importe_ts_query": Table.table_ciudad_importe_ts_scheme(self.attributes),
+            "ciudad_competidor_ts_importe_query": Table.table_ciudad_competidor_ts_importe_scheme(self.attributes),
+            "ciudad_competidor_importe_ts_query": Table.table_ciudad_competidor_importe_ts_scheme(self.attributes),
+            "ciudad_importe_nominal_ts_query": Table.table_ciudad_importe_nominal_ts_scheme(self.attributes),
+            "ciudad_ts_importe_nominal_query": Table.table_ciudad_ts_importe_nominal_scheme(self.attributes),
+            "ciudad_importes_ts_query": Table.table_ciudad_importes_ts_scheme(self.attributes),
+            "ciudad_fecha_importe_nominal_query": Table.table_ciudad_fecha_importe_nominal_scheme(self.attributes),
+            "ciudad_fecha_importe_destino_query": Table.table_ciudad_fecha_importe_destino_scheme(self.attributes),
+            "ciudad_competidor_importe_nominal_ts_query": Table.table_ciudad_competidor_importe_nominal_ts_scheme(self.attributes),
+            "ciudad_competidor_importes_ts_query": Table.table_ciudad_competidor_importes_ts_scheme(self.attributes),
+            "ciudad_competidor_ts_importe_nominal_query": Table.table_ciudad_competidor_ts_importe_nominal_scheme(self.attributes),
+            "ciudad_competidor_fecha_importe_nominal_query": Table.table_ciudad_competidor_fecha_importe_nominal_scheme(self.attributes),
+            "ciudad_competidor_fecha_importe_destino_query": Table.table_ciudad_competidor_fecha_importe_destino_scheme(self.attributes),
+            "agente_query": Table.table_agente_scheme(self.attributes),
+            "agente_competidor_query": Table.table_agente_competidor_scheme(self.attributes),
+            "agente_ts_importe_query": Table.table_agente_ts_importe_scheme(self.attributes),
+            "agente_importe_ts_query": Table.table_agente_importe_ts_scheme(self.attributes),
+            "agente_competidor_ts_importe_query": Table.table_agente_competidor_ts_importe_scheme(self.attributes),
+            "agente_competidor_importe_ts_query": Table.table_agente_competidor_importe_ts_scheme(self.attributes),
+            "agente_importe_nominal_ts_query": Table.table_agente_importe_nominal_ts_scheme(self.attributes),
+            "agente_ts_importe_nominal_query": Table.table_agente_ts_importe_nominal_scheme(self.attributes),
+            "agente_importes_ts_query": Table.table_agente_importes_ts_scheme(
+                self.attributes),
+            "agente_fecha_importe_nominal_query": Table.table_agente_fecha_importe_nominal_scheme(self.attributes),
+            "agente_fecha_importe_destino_query": Table.table_agente_fecha_importe_destino_scheme(self.attributes),
+            "agente_competidor_importe_nominal_ts_query": Table.table_agente_competidor_importe_nominal_ts_scheme(
+                self.attributes),
+            "agente_competidor_importes_ts_query": Table.table_agente_competidor_importes_ts_scheme(self.attributes),
+            "agente_competidor_ts_importe_nominal_query": Table.table_agente_competidor_ts_importe_nominal_scheme(
+                self.attributes),
+            "agente_competidor_fecha_importe_nominal_query": Table.table_agente_competidor_fecha_importe_nominal_scheme(
+                self.attributes),
+            "agente_competidor_fecha_importe_destino_query": Table.table_agente_competidor_fecha_importe_destino_scheme(
+                self.attributes),
           }
 
 
@@ -301,25 +320,32 @@ class CassandraLogic:
             rows = []
 
         if timestamp and not importe_destino and not importe_nominal:
-            rows = self.best_tasa(alt_table, pais_destino, divisa,
-                                  ciudad=ciudad,
-                                  competidor=competidor,
-                                  importe_destino=rows[0][0],
-                                  timestamp=timestamp,
-                                  mostrar=10)
+            try:
+                rows = self.best_tasa(alt_table, pais_destino, divisa,
+                                      ciudad=ciudad,
+                                      num_agente=num_agente,
+                                      competidor=competidor,
+                                      importe_destino=rows[0][0],
+                                      timestamp=timestamp,
+                                      mostrar=10)
+            except IndexError:
+                rows = ["No existe correspondencia con parametros filtrados"]
 
         elif timestamp and not importe_destino and importe_nominal and rows and not search:
             rows = self.best_tasa(alt_table, pais_destino, divisa,
                                   ciudad=ciudad,
+                                  num_agente=num_agente,
                                   competidor=competidor,
                                   importe_destino=rows[0][0],
                                   importe_nominal=importe_nominal,
                                   timestamp=timestamp,
                                   search='best_tasa',
                                   mostrar=10)
+
         elif range_importe_nominal and not importe_destino and rows:
             rows = self.best_tasa(alt_table, pais_destino, divisa,
                                                     ciudad=ciudad,
+                                                    num_agente=num_agente,
                                                     competidor=competidor,
                                                     importe_destino=rows[0][0],
                                                     range_importe_nominal=range_importe_nominal,

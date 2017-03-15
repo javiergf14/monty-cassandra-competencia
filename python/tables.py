@@ -1,6 +1,6 @@
 class Table:
 
-    # QUERIES SETTING CIUDAD.
+    # QUERIES SETTING agente.
 
     # QUERY WITHOUT RESTRICTIONS.
     # For all competitors.
@@ -26,8 +26,8 @@ class Table:
     # QUERY WITH TIMESTAMP RANGE.
     @staticmethod
     # For all competitors.
-    def table_ciudad_timestamp_importe_scheme(attributes):
-        table_name = "ciudad_timestamp_importe_query"
+    def table_ciudad_ts_importe_scheme(attributes):
+        table_name = "ciudad_ts_importe_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + attributes \
                       + "PRIMARY KEY (pais_destino, ciudad, divisa, timestamp, importe_destino, competidor) )" \
@@ -35,8 +35,8 @@ class Table:
         return table_query
 
     @staticmethod
-    def table_ciudad_importe_timestamp_scheme(attributes):
-        table_name = "ciudad_importe_timestamp_query"
+    def table_ciudad_importe_ts_scheme(attributes):
+        table_name = "ciudad_importe_ts_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + attributes \
                       + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_destino, timestamp, competidor) )" \
@@ -45,8 +45,8 @@ class Table:
 
     # For one competitor.
     @staticmethod
-    def table_ciudad_competidor_timestamp_scheme(attributes):
-        table_name = "ciudad_competidor_timestamp_query"
+    def table_ciudad_competidor_ts_importe_scheme(attributes):
+        table_name = "ciudad_competidor_ts_importe_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + attributes \
                       + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, timestamp, importe_destino) )" \
@@ -54,8 +54,8 @@ class Table:
         return table_query
 
     @staticmethod
-    def table_ciudad_competidor_importe_timestamp_scheme(attributes):
-        table_name = "ciudad_competidor_importe_timestamp_query"
+    def table_ciudad_competidor_importe_ts_scheme(attributes):
+        table_name = "ciudad_competidor_importe_ts_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + attributes \
                       + "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, importe_destino, timestamp) )" \
@@ -66,8 +66,8 @@ class Table:
     # QUERY WITH EXACT IMPORTE.
     @staticmethod
     # For all competitors.
-    def table_ciudad_importe_nominal_timestamp_scheme(attributes):
-        table_name = "ciudad_importe_nominal_timestamp_query"
+    def table_ciudad_importe_nominal_ts_scheme(attributes):
+        table_name = "ciudad_importe_nominal_ts_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + attributes \
                       + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_nominal, timestamp, competidor) )" \
@@ -75,8 +75,8 @@ class Table:
         return table_query
 
     @staticmethod
-    def table_ciudad_importe_nominal_y_destino_timestamp_scheme(attributes):
-        table_name = "ciudad_importe_nominal_y_destino_timestamp_query"
+    def table_ciudad_importes_ts_scheme(attributes):
+        table_name = "ciudad_importes_ts_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + attributes \
                       + "PRIMARY KEY (pais_destino, ciudad, divisa, importe_nominal, importe_destino, timestamp, competidor) )" \
@@ -85,8 +85,8 @@ class Table:
 
 
     @staticmethod
-    def table_ciudad_timestamp_importe_nominal_scheme(attributes):
-        table_name = "ciudad_timestamp_importe_nominal_query"
+    def table_ciudad_ts_importe_nominal_scheme(attributes):
+        table_name = "ciudad_ts_importe_nominal_query"
         table_query = "CREATE TABLE " + table_name + "(" \
                       + attributes \
                       + "PRIMARY KEY (pais_destino, ciudad, divisa, timestamp, importe_nominal, competidor) )" \
@@ -188,6 +188,8 @@ class Table:
 
 
     # QUERIES SETTING AGENTE.
+    # QUERY WITHOUT RESTRICTIONS.
+    # For all competitors.
     @staticmethod
     def table_agente_scheme(attributes):
         table_name = "agente_query"
@@ -197,6 +199,7 @@ class Table:
                         "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, importe_destino DESC, competidor DESC);"
         return table_query
 
+    # For one competitor.
     @staticmethod
     def table_agente_competidor_scheme(attributes):
         table_name = "agente_competidor_query"
@@ -204,4 +207,141 @@ class Table:
                       + attributes \
                       + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, importe_destino) )" \
                         "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, importe_destino DESC);"
+        return table_query
+
+    # QUERY WITH TIMESTAMP RANGE.
+    @staticmethod
+    # For all competitors.
+    def table_agente_ts_importe_scheme(attributes):
+        table_name = "agente_ts_importe_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, timestamp, importe_destino, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, timestamp DESC, importe_destino DESC, competidor DESC);"
+        return table_query
+
+    @staticmethod
+    def table_agente_importe_ts_scheme(attributes):
+        table_name = "agente_importe_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, importe_destino, timestamp, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, importe_destino DESC, timestamp DESC, competidor DESC);"
+        return table_query
+
+    # For one competitor.
+    @staticmethod
+    def table_agente_competidor_ts_importe_scheme(attributes):
+        table_name = "agente_competidor_ts_importe_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, timestamp, importe_destino) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, timestamp DESC, importe_destino DESC);"
+        return table_query
+
+    @staticmethod
+    def table_agente_competidor_importe_ts_scheme(attributes):
+        table_name = "agente_competidor_importe_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+    # QUERY WITH EXACT IMPORTE.
+    @staticmethod
+    # For all competitors.
+    def table_agente_importe_nominal_ts_scheme(attributes):
+        table_name = "agente_importe_nominal_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, importe_nominal, timestamp, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, importe_nominal DESC, timestamp DESC, competidor DESC);"
+        return table_query
+
+    @staticmethod
+    def table_agente_importes_ts_scheme(attributes):
+        table_name = "agente_importes_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, importe_nominal, importe_destino, timestamp, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC, competidor DESC);"
+        return table_query
+
+
+    @staticmethod
+    def table_agente_ts_importe_nominal_scheme(attributes):
+        table_name = "agente_ts_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, timestamp, importe_nominal, competidor) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, timestamp DESC, importe_nominal DESC, competidor DESC);"
+        return table_query
+
+    # For one competitor.
+    @staticmethod
+    def table_agente_competidor_importe_nominal_ts_scheme(attributes):
+        table_name = "agente_competidor_importe_nominal_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, importe_nominal, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, importe_nominal DESC, timestamp DESC);"
+        return table_query
+
+    @staticmethod
+    def table_agente_competidor_importes_ts_scheme(attributes):
+        table_name = "agente_competidor_importes_ts_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, importe_nominal, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+
+    @staticmethod
+    def table_agente_competidor_ts_importe_nominal_scheme(attributes):
+        table_name = "agente_competidor_ts_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, timestamp, importe_nominal) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, timestamp DESC, importe_nominal DESC);"
+        return table_query
+
+    # QUERY WITH RANGE IMPORTE.
+    # For all competitors.
+    @staticmethod
+    def table_agente_fecha_importe_nominal_scheme(attributes):
+        table_name = "agente_fecha_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, year, month, day, importe_nominal, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, year DESC, month DESC, day DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+    @staticmethod
+    def table_agente_fecha_importe_destino_scheme(attributes):
+        table_name = "agente_fecha_importe_destino_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, year, month, day, importe_destino, importe_nominal, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, year DESC, month DESC, day DESC, importe_destino DESC, importe_nominal DESC, timestamp DESC);"
+        return table_query
+
+    # For one competitor.
+    @staticmethod
+    def table_agente_competidor_fecha_importe_nominal_scheme(attributes):
+        table_name = "agente_competidor_fecha_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, year, month, day, importe_nominal, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+    @staticmethod
+    def table_agente_competidor_fecha_importe_destino_scheme(attributes):
+        table_name = "agente_competidor_fecha_importe_destino_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, year, month, day, importe_destino, importe_nominal, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_destino DESC, importe_nominal DESC, timestamp DESC);"
         return table_query

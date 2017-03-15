@@ -34,7 +34,7 @@ def busqueda():
     rows_query1 = cassandra.select_all('ciudad_query')
     rows_query3 = cassandra.select_all('geohash_query')
     rows_query5 = cassandra.select_all('agente_query')
-    rows_query7 = cassandra.select_all('ciudad_timestamp_importe_nominal_query')
+    rows_query7 = cassandra.select_all('ciudad_ts_importe_nominal_query')
     return render_template('busqueda.html', **locals())
 
 
@@ -112,6 +112,7 @@ def query1_result():
     cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
 
     ciudad = request.args.get('ciudad')
+    num_agente = request.args.get('numAgente')
     pais_destino = request.args.get('paisDestino')
     divisa = request.args.get('divisa')
     competidor = request.args.get('competidor')
@@ -126,6 +127,17 @@ def query1_result():
 
     importe_nominal_id = 7
 
+    key_fields = ["ciudad", "agente"]
+    key_id = -1
+    if ciudad == '':
+        ciudad = []
+        key_id = 1
+    elif num_agente == '':
+        num_agente = []
+        key_id = 0
+    else:
+        raise Exception('Either ciudad or num_agente must be filled!')
+
     if min_date != '' and max_date != '':
         min_date = min_date.split("/")
         max_date = max_date.split("/")
@@ -139,7 +151,6 @@ def query1_result():
 
     delta = []
     if min_date and max_date and range_importe_nominal:
-        candidate_solutions = dict()
         date1 = date(min_date[2], min_date[1], min_date[0])
         date2 = date(max_date[2], max_date[1], max_date[0])
         delta = date2 - date1
@@ -154,21 +165,24 @@ def query1_result():
     lower_tasa = []
     lower_value = 0
 
+    competidor_flag = True
     if competidor == 'Todos':
         competidor = []
+        competidor_flag = False
         importe_nominal_id -= 1
 
-    fecha_range_table = "ciudad_competidor_fecha_importe_nominal_query" if competidor else "ciudad_fecha_importe_nominal_query"
-    fecha_range_alt_table = "ciudad_competidor_fecha_importe_destino_query" if competidor else "ciudad_fecha_importe_destino_query"
 
-    timestamp_all_importes_table = "ciudad_competidor_timestamp_query" if competidor else "ciudad_timestamp_importe_query"
-    timestamp_all_importes_alt_table = "ciudad_competidor_importe_timestamp_query" if competidor else "ciudad_importe_timestamp_query"
+    fecha_range_table = key_fields[key_id]+competidor_flag*"_competidor"+"_fecha_importe_nominal_query"
+    fecha_range_alt_table = key_fields[key_id]+competidor_flag*"_competidor"+"_fecha_importe_destino_query"
 
-    exact_importe_table = "ciudad_competidor_importe_nominal_ts_query" if competidor else  "ciudad_importe_nominal_timestamp_query"
-    exact_importe_alt_table = "ciudad_competidor_importes_ts_query" if competidor else "ciudad_importe_nominal_y_destino_timestamp_query"
-    exact_importe_limits_table = "ciudad_competidor_ts_importe_nominal_query" if competidor else "ciudad_timestamp_importe_nominal_query"
+    timestamp_all_importes_table = key_fields[key_id]+competidor_flag*"_competidor"+"_ts_importe_query"
+    timestamp_all_importes_alt_table = key_fields[key_id]+competidor_flag*"_competidor"+"_importe_ts_query"
 
-    no_timestamp_table = "ciudad_competidor_query" if competidor else "ciudad_query"
+    exact_importe_table = key_fields[key_id]+competidor_flag*"_competidor"+"_importe_nominal_ts_query"
+    exact_importe_alt_table = key_fields[key_id]+competidor_flag*"_competidor"+"_importes_ts_query"
+    exact_importe_limits_table = key_fields[key_id]+competidor_flag*"_competidor"+"_ts_importe_nominal_query"
+
+    no_ts_table = key_fields[key_id]+competidor_flag*"_competidor"+"_query"
 
     # Fecha range.
     if range_importe_nominal:
@@ -177,6 +191,7 @@ def query1_result():
             fecha = date1+td(days=i)
             results = cassandra.best_tasa(fecha_range_table, pais_destino, divisa,
                                                          ciudad=ciudad,
+                                                         num_agente=num_agente,
                                                          competidor=competidor,
                                                          range_importe_nominal=range_importe_nominal,
                                                          year=fecha.year,
@@ -187,7 +202,10 @@ def query1_result():
                 candidate_solutions[results[0][importe_nominal_id]] = results
 
         sorted_candidates = OrderedDict(sorted(candidate_solutions.items(), key=lambda t: t[0], reverse=True))
-        results = sorted_candidates.items()[0]
+        try:
+            results = sorted_candidates.items()[0]
+        except IndexError:
+            results = ["No existe correspondencia con parametros filtrados"]
 
     # Timestamp range
     elif timestamp:
@@ -195,6 +213,7 @@ def query1_result():
         if importe_nominal == 'Cualquiera':
             results = cassandra.best_tasa(timestamp_all_importes_table, pais_destino, divisa,
                                             ciudad=ciudad,
+                                            num_agente=num_agente,
                                             competidor=competidor,
                                             timestamp=timestamp,
                                             alt_table=timestamp_all_importes_alt_table,
@@ -204,6 +223,7 @@ def query1_result():
             results = cassandra.best_tasa(exact_importe_table, pais_destino, divisa,
                                             ciudad=ciudad,
                                             competidor=competidor,
+                                            num_agente=num_agente,
                                             timestamp=timestamp,
                                             importe_nominal=importe_nominal,
                                             alt_table=exact_importe_alt_table,
@@ -212,6 +232,7 @@ def query1_result():
             if not results:
                 lower_value = cassandra.best_tasa(exact_importe_limits_table, pais_destino, divisa,
                                             ciudad=ciudad,
+                                            num_agente=num_agente,
                                             competidor=competidor,
                                             timestamp=timestamp,
                                             importe_nominal=importe_nominal,
@@ -220,6 +241,7 @@ def query1_result():
 
                 upper_value = cassandra.best_tasa(exact_importe_limits_table, pais_destino, divisa,
                                                   ciudad=ciudad,
+                                                  num_agente=num_agente,
                                                   competidor=competidor,
                                                   timestamp=timestamp,
                                                   importe_nominal=importe_nominal,
@@ -227,8 +249,9 @@ def query1_result():
                                                   mostrar=mostrar)
                 if lower_value:
                     lower_value = float(str(importe_nominal)) - float(lower_value[0][0])
-                    lower_tasa = cassandra.best_tasa(exact_importe_limits_table, pais_destino, divisa,
+                    lower_tasa = cassandra.best_tasa(exact_importe_table, pais_destino, divisa,
                                                 ciudad=ciudad,
+                                                num_agente=num_agente,
                                                 competidor=competidor,
                                                 timestamp=timestamp,
                                                 importe_nominal=lower_value,
@@ -237,8 +260,9 @@ def query1_result():
 
                 if upper_value:
                     upper_value = float(str(importe_nominal)) + float(upper_value[0][0])
-                    upper_tasa = cassandra.best_tasa(exact_importe_limits_table, pais_destino, divisa,
+                    upper_tasa = cassandra.best_tasa(exact_importe_table, pais_destino, divisa,
                                                     ciudad=ciudad,
+                                                    num_agente=num_agente,
                                                     competidor=competidor,
                                                     timestamp=timestamp,
                                                     importe_nominal=upper_value,
@@ -246,8 +270,9 @@ def query1_result():
                                                     mostrar=mostrar)
     # No timestamp range
     else:
-        results = cassandra.best_tasa(no_timestamp_table, pais_destino, divisa,
+        results = cassandra.best_tasa(no_ts_table, pais_destino, divisa,
                                       ciudad=ciudad,
+                                      num_agente=num_agente,
                                       competidor=competidor,
                                       mostrar=mostrar)
 

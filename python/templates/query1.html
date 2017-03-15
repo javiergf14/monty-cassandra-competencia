@@ -35,7 +35,7 @@
 	<br> 
 	<br>
 
-	Ciudad: <input type="text" name="Ciudad" id="Ciudad"><br>
+	Ciudad: <input type="text" name="Ciudad" id="Ciudad"> o Num Agente: <input type="text" name="NumAgente" id="NumAgente"><br>
     Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
     Divisa: <input type="text" name="Divisa" id="Divisa"><br>
 	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
@@ -49,6 +49,7 @@
 <script>
 function sendURL(){
         var ciudad = document.getElementById('Ciudad').value;
+        var numAgente = document.getElementById('NumAgente').value;
         var paisDestino = document.getElementById('PaisDestino').value;
         var divisa = document.getElementById('Divisa').value;
         var competidor = document.getElementById('Competidor').value;
@@ -61,7 +62,7 @@ function sendURL(){
 		var minRangeImporteNominal = document.getElementById('MinRangeImporteNominal').value;
 		var maxRangeImporteNominal = document.getElementById('MaxRangeImporteNominal').value;
 
-		var url = '/competencia/query1_result?ciudad='+ciudad+'&paisDestino='+paisDestino+'&divisa='
+		var url = '/competencia/query1_result?ciudad='+ciudad+'&numAgente='+numAgente+'&paisDestino='+paisDestino+'&divisa='
 			+divisa+'&competidor='+competidor+'&mostrar='+mostrar+'&minTS='+minTS+'&maxTS='+maxTS+'&importeNominal='
 			+importeNominal+'&minDate='+minDate+'&maxDate='+maxDate+'&minRangeImporteNominal='+minRangeImporteNominal
 			+'&maxRangeImporteNominal='+maxRangeImporteNominal;
