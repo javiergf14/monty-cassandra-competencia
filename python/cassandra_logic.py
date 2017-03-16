@@ -1,5 +1,8 @@
 from cassandra.cluster import Cluster
 from cassandra.protocol import ConfigurationException
+from cassandra import ConsistencyLevel
+from cassandra.query import SimpleStatement
+from copy import deepcopy
 from tables import Table
 import Geohash
 
@@ -49,48 +52,51 @@ class CassandraLogic:
                           + "month int, " \
                           + "year int, "
 
-        self.tables = {
-            "ciudad_query": Table.table_ciudad_scheme(self.attributes),
-            "ciudad_competidor_query": Table.table_ciudad_competidor_scheme(self.attributes),
-            "geohash_query": Table.table_geohash_scheme(self.attributes),
-            "geohash_competidor_query": Table.table_geohash_competidor_scheme(self.attributes),
-            "ciudad_ts_importe_query": Table.table_ciudad_ts_importe_scheme(self.attributes),
-            "ciudad_importe_ts_query": Table.table_ciudad_importe_ts_scheme(self.attributes),
-            "ciudad_competidor_ts_importe_query": Table.table_ciudad_competidor_ts_importe_scheme(self.attributes),
-            "ciudad_competidor_importe_ts_query": Table.table_ciudad_competidor_importe_ts_scheme(self.attributes),
-            "ciudad_importe_nominal_ts_query": Table.table_ciudad_importe_nominal_ts_scheme(self.attributes),
-            "ciudad_ts_importe_nominal_query": Table.table_ciudad_ts_importe_nominal_scheme(self.attributes),
-            "ciudad_importes_ts_query": Table.table_ciudad_importes_ts_scheme(self.attributes),
-            "ciudad_fecha_importe_nominal_query": Table.table_ciudad_fecha_importe_nominal_scheme(self.attributes),
-            "ciudad_fecha_importe_destino_query": Table.table_ciudad_fecha_importe_destino_scheme(self.attributes),
-            "ciudad_competidor_importe_nominal_ts_query": Table.table_ciudad_competidor_importe_nominal_ts_scheme(self.attributes),
-            "ciudad_competidor_importes_ts_query": Table.table_ciudad_competidor_importes_ts_scheme(self.attributes),
-            "ciudad_competidor_ts_importe_nominal_query": Table.table_ciudad_competidor_ts_importe_nominal_scheme(self.attributes),
-            "ciudad_competidor_fecha_importe_nominal_query": Table.table_ciudad_competidor_fecha_importe_nominal_scheme(self.attributes),
-            "ciudad_competidor_fecha_importe_destino_query": Table.table_ciudad_competidor_fecha_importe_destino_scheme(self.attributes),
-            "agente_query": Table.table_agente_scheme(self.attributes),
-            "agente_competidor_query": Table.table_agente_competidor_scheme(self.attributes),
-            "agente_ts_importe_query": Table.table_agente_ts_importe_scheme(self.attributes),
-            "agente_importe_ts_query": Table.table_agente_importe_ts_scheme(self.attributes),
-            "agente_competidor_ts_importe_query": Table.table_agente_competidor_ts_importe_scheme(self.attributes),
-            "agente_competidor_importe_ts_query": Table.table_agente_competidor_importe_ts_scheme(self.attributes),
-            "agente_importe_nominal_ts_query": Table.table_agente_importe_nominal_ts_scheme(self.attributes),
-            "agente_ts_importe_nominal_query": Table.table_agente_ts_importe_nominal_scheme(self.attributes),
-            "agente_importes_ts_query": Table.table_agente_importes_ts_scheme(
-                self.attributes),
-            "agente_fecha_importe_nominal_query": Table.table_agente_fecha_importe_nominal_scheme(self.attributes),
-            "agente_fecha_importe_destino_query": Table.table_agente_fecha_importe_destino_scheme(self.attributes),
-            "agente_competidor_importe_nominal_ts_query": Table.table_agente_competidor_importe_nominal_ts_scheme(
-                self.attributes),
-            "agente_competidor_importes_ts_query": Table.table_agente_competidor_importes_ts_scheme(self.attributes),
-            "agente_competidor_ts_importe_nominal_query": Table.table_agente_competidor_ts_importe_nominal_scheme(
-                self.attributes),
-            "agente_competidor_fecha_importe_nominal_query": Table.table_agente_competidor_fecha_importe_nominal_scheme(
-                self.attributes),
-            "agente_competidor_fecha_importe_destino_query": Table.table_agente_competidor_fecha_importe_destino_scheme(
-                self.attributes),
-          }
+        self.attributes_scheme = "pais_destino text, " \
+                          + "divisa text, " \
+                          + "competidor text, " \
 
+        self.tables = {
+            "ciudad_query": Table.ciudad(self.attributes),
+            "ciudad_competidor_query": Table.ciudad_competidor(self.attributes),
+            "ciudad_ts_importe_query": Table.ciudad_ts_importe(self.attributes),
+            "ciudad_importe_ts_query": Table.ciudad_importe_ts(self.attributes),
+            "ciudad_competidor_ts_importe_query": Table.ciudad_competidor_ts_importe(self.attributes),
+            "ciudad_competidor_importe_ts_query": Table.ciudad_competidor_importe_ts(self.attributes),
+            "ciudad_importe_nominal_ts_query": Table.ciudad_importe_nominal_ts(self.attributes),
+            "ciudad_ts_importe_nominal_query": Table.ciudad_ts_importe_nominal(self.attributes),
+            "ciudad_importes_ts_query": Table.ciudad_importes_ts(self.attributes),
+            "ciudad_fecha_importe_nominal_query": Table.ciudad_fecha_importe_nominal(self.attributes),
+            "ciudad_fecha_importe_destino_query": Table.ciudad_fecha_importe_destino(self.attributes),
+            "ciudad_competidor_importe_nominal_ts_query": Table.ciudad_competidor_importe_nominal_ts(self.attributes),
+            "ciudad_competidor_importes_ts_query": Table.ciudad_competidor_importes_ts(self.attributes),
+            "ciudad_competidor_ts_importe_nominal_query": Table.ciudad_competidor_ts_importe_nominal(self.attributes),
+            "ciudad_competidor_fecha_importe_nominal_query": Table.ciudad_competidor_fecha_importe_nominal(self.attributes),
+            "ciudad_competidor_fecha_importe_destino_query": Table.ciudad_competidor_fecha_importe_destino(self.attributes),
+            "agente_query": Table.agente(self.attributes),
+            "agente_competidor_query": Table.agente_competidor(self.attributes),
+            "agente_ts_importe_query": Table.agente_ts_importe(self.attributes),
+            "agente_importe_ts_query": Table.agente_importe_ts(self.attributes),
+            "agente_competidor_ts_importe_query": Table.agente_competidor_ts_importe(self.attributes),
+            "agente_competidor_importe_ts_query": Table.agente_competidor_importe_ts(self.attributes),
+            "agente_importe_nominal_ts_query": Table.agente_importe_nominal_ts(self.attributes),
+            "agente_ts_importe_nominal_query": Table.agente_ts_importe_nominal(self.attributes),
+            "agente_importes_ts_query": Table.agente_importes_ts(
+                self.attributes),
+            "agente_fecha_importe_nominal_query": Table.agente_fecha_importe_nominal(self.attributes),
+            "agente_fecha_importe_destino_query": Table.agente_fecha_importe_destino(self.attributes),
+            "agente_competidor_importe_nominal_ts_query": Table.agente_competidor_importe_nominal_ts(
+                self.attributes),
+            "agente_competidor_importes_ts_query": Table.agente_competidor_importes_ts(self.attributes),
+            "agente_competidor_ts_importe_nominal_query": Table.agente_competidor_ts_importe_nominal(
+                self.attributes),
+            "agente_competidor_fecha_importe_nominal_query": Table.agente_competidor_fecha_importe_nominal(
+                self.attributes),
+            "agente_competidor_fecha_importe_destino_query": Table.agente_competidor_fecha_importe_destino(
+                self.attributes),
+            "geohash_scheme": Table.geohash_scheme(self.attributes_scheme),
+            "geohash_competidor_scheme": Table.geohash_competidor_scheme(self.attributes_scheme),
+          }
 
         # Connect the application to the Cassandra cluster
         cluster = Cluster([contact_point], port=9042, cql_version='3.4.4')
@@ -179,8 +185,10 @@ class CassandraLogic:
         """)
 
     def insert_into_all_tables(self, data):
-        column_names = ["ciudad", "pais_destino", "divisa", "competidor", "comision",
-                        "tasa_cambio", "timestamp", "lat", "lon", "num_agente", "importe_nominal", "day", "month", "year"]
+        # Column names and values for most of the tables.
+        column_names = ["pais_destino", "divisa", "competidor", "timestamp", "ciudad", "comision",
+                        "tasa_cambio",  "lat", "lon", "num_agente", "importe_nominal", "day", "month", "year"]
+
         column_values = []
         for i in column_names:
             column_values.append(data[i])
@@ -189,16 +197,20 @@ class CassandraLogic:
         importe_destino = 100 * float(data["tasa_cambio"]) - float(data["comision"])
         column_values.append(importe_destino)
 
+        # Special case for geolocations: pais_destino, divisa and competidor
+        column_names_scheme = column_names[0:3]
+        column_values_scheme = column_values[0:3]
+
+        # Fill all the tables.
         for table_name in self.tables.keys():
-            if table_name.startswith("geo"):
-                column_names.append("geohash")
-                column_values.append(Geohash.encode(float(data['lat']), float(data['lon'])))
-                self._insert_data(table_name, column_names, column_values)
-                # Remove last items.
-                column_names.pop(-1)
-                column_values.pop(-1)
-            else:
-                self._insert_data(table_name, column_names, column_values)
+            column_names_to_insert = deepcopy(column_names_scheme) if table_name.endswith('scheme') else column_names
+            column_values_to_insert = deepcopy(column_values_scheme) if table_name.endswith('scheme') else column_values
+
+            if table_name.startswith('geo'):
+                column_names_to_insert.append('geohash')
+                column_values_to_insert.append(Geohash.encode(float(data['lat']), float(data['lon'])))
+
+            self._insert_data(table_name, column_names_to_insert, column_values_to_insert)
 
     def _insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
@@ -211,14 +223,29 @@ class CassandraLogic:
                column_names (list): name of the columns to insert.
                column_values (list): values of the columns to insert.
         """
-        insert_data_query = "INSERT INTO {} (".format(table_name)
-        insert_data_query += ",".join(column_names)
-        insert_data_query += ") VALUES("
-        processed_values = ["'"+c+"'" if column_names[cont] in self.string_set else str(c) for cont, c in enumerate(column_values)]
-        insert_data_query += ",".join(processed_values)
-        insert_data_query += ");"
+        insert_flag = True
+        # Do not insert twice the same data in geolocations.
+        if table_name.endswith('scheme'):
+            check_data_query = "SELECT geohash FROM {} WHERE ".format(table_name)
+            for cont, name in enumerate(column_names):
+                value = "'"+column_values[cont]+"'" if name in self.string_set else str(column_values[cont])
+                if cont == len(column_names)-1:
+                    check_data_query += name+'='+value
+                else:
+                    check_data_query += name + '=' + value + " AND "
 
-        self.session.execute(insert_data_query)
+            insert_flag = not self.session.execute(check_data_query).current_rows
+
+        if insert_flag:
+            insert_data_query = "INSERT INTO {} (".format(table_name)
+            insert_data_query += ",".join(column_names)
+            insert_data_query += ") VALUES("
+            processed_values = ["'"+c+"'" if column_names[cont] in self.string_set else str(c) for cont, c in enumerate(column_values)]
+            insert_data_query += ",".join(processed_values)
+            insert_data_query += ")"
+            insert_data_query += ";"
+
+            self.session.execute(insert_data_query)
 
     def select_all(self, table_name):
         """Select all the information of a table
@@ -305,7 +332,6 @@ class CassandraLogic:
             min_geohash = geohash[1]
             query += "AND geohash < '{}' AND geohash > '{}' ".format(max_geohash, min_geohash)
 
-        print(query)
         query += "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
 
