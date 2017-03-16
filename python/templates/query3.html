@@ -35,23 +35,40 @@
 	<br> 
 	<br>
 
-	Numero agente: <input type="text" name="NumAgente" id="NumAgente"><br>
     Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
     Divisa: <input type="text" name="Divisa" id="Divisa"><br>
 	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
+
+	<br>
+	Fecha concreta (dd/mm/yyyy): <input type="text" name="FechaConcreta" id="FechaConcreta"><br>
+	Fecha entre (dd/mm/yyyy): <input type="text" name="MinDate" id="MinDate"> y <input type="text" name="MaxDate" id="MaxDate"><br>
+
+	<br>
+	Importe nominal: <input type="text" name="ImporteNominal" id="ImporteNominal"> <br>
+	Rango importe: <input type="text" name="MinRangeImporteNominal" id="MinRangeImporteNominal"> hasta  <input type="text" name="MaxRangeImporteNominal" id="MaxRangeImporteNominal"> <br>
+
+	<br>
 	Mostrar: <input type="text" name="Mostrar" id="Mostrar" value="10"> mejores <br>
 	<button onclick="sendURL();">Enviar</button>
 </body>
 <script>
 function sendURL(){
-        var numAgente = document.getElementById('NumAgente').value;
+     	var numAgente = document.getElementById('NumAgente').value;
         var paisDestino = document.getElementById('PaisDestino').value;
         var divisa = document.getElementById('Divisa').value;
         var competidor = document.getElementById('Competidor').value;
-        var mostrar =  document.getElementById('Mostrar').value;
+        var importeNominal = document.getElementById('ImporteNominal').value;
+        var minRangeImporteNominal = document.getElementById('MinRangeImporteNominal').value;
+		var maxRangeImporteNominal = document.getElementById('MaxRangeImporteNominal').value;
+		var concrete_date = document.getElementById('FechaConcreta').value;
+		var minDate = document.getElementById('MinDate').value;
+		var maxDate = document.getElementById('MaxDate').value;
+		var mostrar =  document.getElementById('Mostrar').value;
 
-		var url = '/competencia/query3_result?numAgente='+numAgente+'&paisDestino='+paisDestino
-			+'&divisa='+divisa+'&competidor='+competidor+'&mostrar='+mostrar;
+		var url = '/competencia/query2_result?&numAgente='+numAgente+&paisDestino='+paisDestino
+			+'&divisa='+divisa+'&competidor='+competidor+'&mostrar='+mostrar
+			+'&importeNominal='+importeNominal+'&minRangeImporteNominal='+minRangeImporteNominal
+			+'&maxRangeImporteNominal='+maxRangeImporteNominal+'&minDate='+minDate+'&maxDate='+maxDate;
         window.location.href=url;
 }	
 </script>

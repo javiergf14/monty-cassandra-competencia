@@ -1,10 +1,9 @@
 from cassandra.cluster import Cluster
 from cassandra.protocol import ConfigurationException
-from cassandra import ConsistencyLevel
-from cassandra.query import SimpleStatement
 from copy import deepcopy
 from tables import Table
 import Geohash
+
 
 
 class CassandraLogic:
@@ -96,6 +95,25 @@ class CassandraLogic:
                 self.attributes),
             "geohash_scheme": Table.geohash_scheme(self.attributes_scheme),
             "geohash_competidor_scheme": Table.geohash_competidor_scheme(self.attributes_scheme),
+            "geohash_query": Table.geohash(self.attributes),
+            "geohash_competidor_query": Table.geohash_competidor(self.attributes),
+            "geohash_ts_importe_query": Table.geohash_ts_importe(self.attributes),
+            "geohash_importe_ts_query": Table.geohash_importe_ts(self.attributes),
+            "geohash_competidor_ts_importe_query": Table.geohash_competidor_ts_importe(self.attributes),
+            "geohash_competidor_importe_ts_query": Table.geohash_competidor_importe_ts(self.attributes),
+            "geohash_importe_nominal_ts_query": Table.geohash_importe_nominal_ts(self.attributes),
+            "geohash_ts_importe_nominal_query": Table.geohash_ts_importe_nominal(self.attributes),
+            "geohash_importes_ts_query": Table.geohash_importes_ts(self.attributes),
+            "geohash_fecha_importe_nominal_query": Table.geohash_fecha_importe_nominal(self.attributes),
+            "geohash_fecha_importe_destino_query": Table.geohash_fecha_importe_destino(self.attributes),
+            "geohash_competidor_importe_nominal_ts_query": Table.geohash_competidor_importe_nominal_ts(self.attributes),
+            "geohash_competidor_importes_ts_query": Table.geohash_competidor_importes_ts(self.attributes),
+            "geohash_competidor_ts_importe_nominal_query": Table.geohash_competidor_ts_importe_nominal(self.attributes),
+            "geohash_competidor_fecha_importe_nominal_query": Table.geohash_competidor_fecha_importe_nominal(
+                self.attributes),
+            "geohash_competidor_fecha_importe_destino_query": Table.geohash_competidor_fecha_importe_destino(
+                self.attributes),
+
           }
 
         # Connect the application to the Cassandra cluster
@@ -209,8 +227,11 @@ class CassandraLogic:
             if table_name.startswith('geo'):
                 column_names_to_insert.append('geohash')
                 column_values_to_insert.append(Geohash.encode(float(data['lat']), float(data['lon'])))
-
-            self._insert_data(table_name, column_names_to_insert, column_values_to_insert)
+                self._insert_data(table_name, column_names_to_insert, column_values_to_insert)
+                column_names_to_insert.pop(-1)
+                column_values_to_insert.pop(-1)
+            else:
+                self._insert_data(table_name, column_names_to_insert, column_values_to_insert)
 
     def _insert_data(self, table_name, column_names, column_values):
         """Insert a row in a table
@@ -268,7 +289,8 @@ class CassandraLogic:
     def best_tasa(self, table_name, pais_destino, divisa,
                   ciudad=None,
                   num_agente=None,
-                  geohash = None,
+                  geohash=None,
+                  geohash_range = None,
                   timestamp = None,
                   competidor=None,
                   importe_destino=None,
@@ -299,6 +321,8 @@ class CassandraLogic:
             query += "AND ciudad='{}' ".format(ciudad)
         elif num_agente:
             query += "AND num_agente={} ".format(num_agente)
+        elif geohash:
+            query += "AND geohash='{}' ".format(geohash)
 
         query += "AND divisa='{}' ".format(divisa)
 
@@ -327,9 +351,10 @@ class CassandraLogic:
             max_ts = timestamp[0]
             min_ts = timestamp[1]
             query += "AND timestamp < {} AND timestamp > {} ".format(max_ts, min_ts)
-        elif geohash:
-            max_geohash = geohash[0]
-            min_geohash = geohash[1]
+
+        elif geohash_range:
+            max_geohash = geohash_range[0]
+            min_geohash = geohash_range[1]
             query += "AND geohash < '{}' AND geohash > '{}' ".format(max_geohash, min_geohash)
 
         query += "LIMIT {}".format(mostrar)
@@ -350,6 +375,7 @@ class CassandraLogic:
                 rows = self.best_tasa(alt_table, pais_destino, divisa,
                                       ciudad=ciudad,
                                       num_agente=num_agente,
+                                      geohash=geohash,
                                       competidor=competidor,
                                       importe_destino=rows[0][0],
                                       timestamp=timestamp,
@@ -361,6 +387,7 @@ class CassandraLogic:
             rows = self.best_tasa(alt_table, pais_destino, divisa,
                                   ciudad=ciudad,
                                   num_agente=num_agente,
+                                  geohash=geohash,
                                   competidor=competidor,
                                   importe_destino=rows[0][0],
                                   importe_nominal=importe_nominal,
@@ -372,6 +399,7 @@ class CassandraLogic:
             rows = self.best_tasa(alt_table, pais_destino, divisa,
                                                     ciudad=ciudad,
                                                     num_agente=num_agente,
+                                                    geohash=geohash,
                                                     competidor=competidor,
                                                     importe_destino=rows[0][0],
                                                     range_importe_nominal=range_importe_nominal,
