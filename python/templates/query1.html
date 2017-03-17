@@ -35,37 +35,43 @@
 	<br> 
 	<br>
 
-	Ciudad: <input type="text" name="Ciudad" id="Ciudad"> o Num Agente: <input type="text" name="NumAgente" id="NumAgente"><br>
-    Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino"><br>
-    Divisa: <input type="text" name="Divisa" id="Divisa"><br>
+	Ciudad: <input type="text" name="Ciudad" id="Ciudad"> o Num Agente: <input type="text" name="NumAgente" id="NumAgente" value=23><br>
+    Pais Destino: <input type="text" name="PaisDestino" id="PaisDestino" value="Colombia"><br>
+    Divisa: <input type="text" name="Divisa" id="Divisa" value="Peso"><br>
 	Competidor: <input type="text" name="Competidor" id="Competidor" value="Todos"><br>
-	Timestamp entre: <input type="text" name="minTS" id="minTS"> y <input type="text" name="maxTS" id="maxTS"><br>
+
+	<br>
+	Fecha concreta (dd/mm/yyyy): <input type="text" name="ConcreteDate" id="ConcreteDate" value="13/03/2017"><br>
 	Fecha entre (dd/mm/yyyy): <input type="text" name="MinDate" id="MinDate"> y <input type="text" name="MaxDate" id="MaxDate"><br>
-	Importe nominal: <input type="text" name="ImporteNominal" id="ImporteNominal" value="Cualquiera">
-		o rango importe: <input type="text" name="MinRangeImporteNominal" id="MinRangeImporteNominal"> hasta  <input type="text" name="MaxRangeImporteNominal" id="MaxRangeImporteNominal"> <br>
+
+	<br>
+	Importe nominal: <input type="text" name="ImporteNominal" id="ImporteNominal"> <br>
+	Rango importe: <input type="text" name="MinRangeImporteNominal" id="MinRangeImporteNominal"> hasta  <input type="text" name="MaxRangeImporteNominal" id="MaxRangeImporteNominal"> <br>
+
+	<br>
 	Mostrar: <input type="text" name="Mostrar" id="Mostrar" value="10"> mejores <br>
 	<button onclick="sendURL();">Enviar</button>
 </body>
 <script>
 function sendURL(){
-        var ciudad = document.getElementById('Ciudad').value;
-        var numAgente = document.getElementById('NumAgente').value;
+		var ciudad = document.getElementById('Ciudad').value;
+     	var numAgente = document.getElementById('NumAgente').value;
         var paisDestino = document.getElementById('PaisDestino').value;
         var divisa = document.getElementById('Divisa').value;
         var competidor = document.getElementById('Competidor').value;
-        var minTS = document.getElementById('minTS').value;
-        var maxTS = document.getElementById('maxTS').value;
         var importeNominal = document.getElementById('ImporteNominal').value;
-        var mostrar =  document.getElementById('Mostrar').value;
-        var minDate = document.getElementById('MinDate').value;
-		var maxDate = document.getElementById('MaxDate').value;
-		var minRangeImporteNominal = document.getElementById('MinRangeImporteNominal').value;
+        var minRangeImporteNominal = document.getElementById('MinRangeImporteNominal').value;
 		var maxRangeImporteNominal = document.getElementById('MaxRangeImporteNominal').value;
+		var concreteDate = document.getElementById('ConcreteDate').value;
+		var minDate = document.getElementById('MinDate').value;
+		var maxDate = document.getElementById('MaxDate').value;
+		var mostrar =  document.getElementById('Mostrar').value;
 
-		var url = '/competencia/query1_result?ciudad='+ciudad+'&numAgente='+numAgente+'&paisDestino='+paisDestino+'&divisa='
-			+divisa+'&competidor='+competidor+'&mostrar='+mostrar+'&minTS='+minTS+'&maxTS='+maxTS+'&importeNominal='
-			+importeNominal+'&minDate='+minDate+'&maxDate='+maxDate+'&minRangeImporteNominal='+minRangeImporteNominal
-			+'&maxRangeImporteNominal='+maxRangeImporteNominal;
+		var url = '/competencia/query1_result?ciudad='+ciudad+'&numAgente='+numAgente+'&paisDestino='+paisDestino
+			+'&divisa='+divisa+'&competidor='+competidor+'&mostrar='+mostrar
+			+'&importeNominal='+importeNominal+'&minRangeImporteNominal='+minRangeImporteNominal
+			+'&maxRangeImporteNominal='+maxRangeImporteNominal+'&minDate='+minDate+'&maxDate='+maxDate
+			+'&concreteDate='+concreteDate;
         window.location.href=url;
 }	
 </script>

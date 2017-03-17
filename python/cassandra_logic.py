@@ -93,8 +93,8 @@ class CassandraLogic:
             #     self.attributes),
             # "agente_competidor_fecha_importe_destino_query": Table.agente_competidor_fecha_importe_destino(
             #     self.attributes),
-            # "geohash_scheme": Table.geohash_scheme(self.attributes_scheme),
-            # "geohash_competidor_scheme": Table.geohash_competidor_scheme(self.attributes_scheme),
+            "geohash_scheme": Table.geohash_scheme(self.attributes_scheme),
+            "geohash_competidor_scheme": Table.geohash_competidor_scheme(self.attributes_scheme),
             # "geohash_query": Table.geohash(self.attributes),
             # "geohash_competidor_query": Table.geohash_competidor(self.attributes),
             # "geohash_ts_importe_query": Table.geohash_ts_importe(self.attributes),
@@ -119,6 +119,18 @@ class CassandraLogic:
             "agente_competidor_query": Table.agente_competidor(self.attributes),
             "agente_importe_nominal_query": Table.agente_importe_nominal(self.attributes),
             "agente_competidor_importe_nominal_query": Table.agente_competidor_importe_nominal(self.attributes),
+            "ciudad_query": Table.ciudad(self.attributes),
+            "ciudad_competidor_query": Table.ciudad_competidor(self.attributes),
+            "ciudad_importe_nominal_query": Table.ciudad_importe_nominal(self.attributes),
+            "ciudad_competidor_importe_nominal_query": Table.ciudad_competidor_importe_nominal(self.attributes),
+            "pais_query": Table.pais(self.attributes),
+            "pais_competidor_query": Table.pais_competidor(self.attributes),
+            "pais_importe_nominal_query": Table.pais_importe_nominal(self.attributes),
+            "pais_competidor_importe_nominal_query": Table.pais_competidor_importe_nominal(self.attributes),
+            "geohash_query": Table.geohash(self.attributes),
+            "geohash_competidor_query": Table.geohash_competidor(self.attributes),
+            "geohash_importe_nominal_query": Table.geohash_importe_nominal(self.attributes),
+            "geohash_competidor_importe_nominal_query": Table.geohash_competidor_importe_nominal(self.attributes),
 
 
           }
