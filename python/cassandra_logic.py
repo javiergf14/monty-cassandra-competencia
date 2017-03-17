@@ -133,7 +133,6 @@ class CassandraLogic:
     def _create_functions(self):
         """Create User Defined Functions
         """
-
         self.session.execute("""
             CREATE FUNCTION nearest_lower_importe(importe_user double, importe_nominal double)
             RETURNS NULL ON NULL INPUT
@@ -251,7 +250,6 @@ class CassandraLogic:
                   num_agente=None,
                   geohash=None,
                   geohash_range = None,
-                  timestamp = None,
                   competidor=None,
                   importe_destino=None,
                   importe_nominal=None,
@@ -260,13 +258,10 @@ class CassandraLogic:
                   month=None,
                   day=None,
                   search=None,
-                  alt_table=None,
-                  mostrar=None):
+                  ):
 
         # If query data is between two timestamps, we need a trick to retrieve the row.
-        if (timestamp) and not importe_destino and not search:
-            sel = 'max(importe_destino)'
-        elif search == 'lower':
+        if search == 'lower':
             sel = 'min(nearest_lower_importe({}, importe_nominal))'.format(importe_nominal)
         elif search == 'upper':
             sel = 'min(nearest_upper_importe({}, importe_nominal))'.format(importe_nominal)
@@ -307,18 +302,11 @@ class CassandraLogic:
             max_importe = range_importe_nominal[1]
             query += "AND importe_nominal <= {} AND importe_nominal >= {} ".format(max_importe, min_importe)
 
-        if timestamp:
-            max_ts = timestamp[0]
-            min_ts = timestamp[1]
-            query += "AND timestamp < {} AND timestamp > {} ".format(max_ts, min_ts)
-
         elif geohash_range:
             max_geohash = geohash_range[0]
             min_geohash = geohash_range[1]
             query += "AND geohash <= '{}' AND geohash >= '{}' ".format(max_geohash, min_geohash)
 
-        if mostrar and mostrar != -1:
-            query += "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
 
         rows = []
@@ -328,33 +316,6 @@ class CassandraLogic:
                 row.append(str(r))
             rows.append(row)
 
-        if not rows or rows[0][0] == 'None':
-            rows = []
-
-        if timestamp and not importe_destino and not importe_nominal:
-            try:
-                rows = self.best_tasa(alt_table, pais_destino, divisa,
-                                      ciudad=ciudad,
-                                      num_agente=num_agente,
-                                      geohash=geohash,
-                                      competidor=competidor,
-                                      importe_destino=rows[0][0],
-                                      timestamp=timestamp,
-                                      mostrar=10)
-            except IndexError:
-                rows = ["No existe correspondencia con parametros filtrados"]
-
-        elif timestamp and not importe_destino and importe_nominal and rows and not search:
-            rows = self.best_tasa(alt_table, pais_destino, divisa,
-                                  ciudad=ciudad,
-                                  num_agente=num_agente,
-                                  geohash=geohash,
-                                  competidor=competidor,
-                                  importe_destino=rows[0][0],
-                                  importe_nominal=importe_nominal,
-                                  timestamp=timestamp,
-                                  search='best_tasa',
-                                  mostrar=10)
-
+        rows = [] if not rows or rows[0][0] == 'None' else rows
 
         return rows
