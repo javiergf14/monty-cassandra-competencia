@@ -472,6 +472,135 @@ def query3():
 
 @app.route("/competencia/query3_result", methods=['GET'])
 def query3_result():
+    cassandra = CassandraLogic.from_existing_keyspace('127.0.0.1', 'precios_competencia')
+
+    num_agente = request.args.get('numAgente')
+    pais_destino = request.args.get('paisDestino')
+    divisa = request.args.get('divisa')
+    competidor = request.args.get('competidor')
+
+    importe_nominal = float(str(request.args.get('importeNominal'))) if request.args.get('importeNominal') != '' else None
+    min_range_importe_nominal = float(str(request.args.get('minRangeImporteNominal'))) if request.args.get('minRangeImporteNominal') != '' else None
+    max_range_importe_nominal = float(str(request.args.get('maxRangeImporteNominal'))) if request.args.get('maxRangeImporteNominal') != '' else None
+    range_importe_nominal = [min_range_importe_nominal, max_range_importe_nominal] if min_range_importe_nominal and max_range_importe_nominal else []
+
+    min_date = request.args.get('minDate') if request.args.get('minDate') != '' else None
+    max_date = request.args.get('maxDate') if request.args.get('maxDate') != '' else None
+    concrete_date = request.args.get('concreteDate') if request.args.get('concreteDate') != '' else None
+    day = month = year = delta_date = None
+
+    mostrar = int(request.args.get('mostrar'))
+    last_mostrar = intermediate_mostrar = mostrar
+
+    if min_date and max_date:
+        min_date = [int(i) for i in min_date.split("/")]
+        min_date = date(min_date[2], min_date[1], min_date[0])
+        max_date = [int(i) for i in max_date.split("/")]
+        max_date = date(max_date[2], max_date[1], max_date[0])
+        delta_date = max_date - min_date
+        intermediate_mostrar = -1
+    elif concrete_date:
+        day, month, year = [int(i) for i in concrete_date.split("/")]
+        min_date = date(year, month, day)
+        delta_date = td(0)
+
+    competidor = None if competidor == 'Todos' else competidor
+
+    results = []
+    upper_value = None
+    upper_tasa_results = []
+    lower_value = None
+    lower_tasa_results = []
+    importe_destino_id = 8 if competidor else 7
+    table = ""
+
+    if importe_nominal or range_importe_nominal or delta_date:
+        table = "agente_competidor_importe_nominal_query" if competidor else "agente_importe_nominal_query"
+        if range_importe_nominal or delta_date: # We cannot limit the individuals queries, but the overall query later instead.
+            mostrar = -1
+    else:
+        table = "agente_competidor_query" if competidor else "agente_query"
+
+    for i in range(delta_date.days + 1):
+        fecha = min_date + td(days=i)
+        day, month, year = fecha.day, fecha.month, fecha.year
+
+        specific_day_results = cassandra.best_tasa(table, pais_destino, divisa,
+                                num_agente=num_agente,
+                                competidor=competidor,
+                                day=day,
+                                month=month,
+                                year=year,
+                                importe_nominal=importe_nominal,
+                                range_importe_nominal=range_importe_nominal,
+                                mostrar=mostrar,)
+
+
+        # Range importe: We need to sort the results by importe_destino
+        if specific_day_results and range_importe_nominal:
+            specific_results_dict = dict()
+            for cont, r in enumerate(specific_day_results):
+                specific_results_dict[cont] = r
+
+            specific_ordered_results = OrderedDict(sorted(specific_results_dict.items(), key=lambda t: t[1][importe_destino_id], reverse=True))
+            specific_day_results = list(specific_ordered_results.values())[:intermediate_mostrar]
+
+        # Specific importe: There does not exist a specific match in importe_nominal.
+        elif not specific_day_results and importe_nominal:
+            lower_value = cassandra.best_tasa(table, pais_destino, divisa,
+                                              num_agente=num_agente,
+                                              competidor=competidor,
+                                              day=day,
+                                              month=month,
+                                              year=year,
+                                              importe_nominal=importe_nominal,
+                                              search='lower',
+                                              mostrar=mostrar,)
+            lower_value = float(lower_value[0][0]) if lower_value else None
+            lower_value = importe_nominal - lower_value if lower_value and abs(lower_value) < 10000000.0 else None
+
+            upper_value = cassandra.best_tasa(table, pais_destino, divisa,
+                                              num_agente=num_agente,
+                                              competidor=competidor,
+                                              day=day,
+                                              month=month,
+                                              year=year,
+                                              importe_nominal=importe_nominal,
+                                              search='upper',
+                                              mostrar=mostrar,)
+            upper_value = float(upper_value[0][0]) if upper_value else None
+            upper_value = upper_value + importe_nominal if upper_value and upper_value < 10000000.0 else None
+
+            if lower_value:
+                lower_tasa_results = cassandra.best_tasa(table, pais_destino, divisa,
+                                                         num_agente=num_agente,
+                                                         competidor=competidor,
+                                                         day=day,
+                                                         month=month,
+                                                         year=year,
+                                                         importe_nominal=lower_value,
+                                                         mostrar=mostrar, )
+            if upper_value:
+                upper_tasa_results = cassandra.best_tasa(table, pais_destino, divisa,
+                                num_agente=num_agente,
+                                competidor=competidor,
+                                day=day,
+                                month=month,
+                                year=year,
+                                importe_nominal=upper_value,
+                                mostrar=mostrar,)
+
+        results.append(specific_day_results)
+
+    # Join and sort information for every day
+    results_dict = dict()
+    for cont, days in enumerate(results):
+        for d in days:
+            results_dict[str(cont)+str(d)] = d
+    ordered_results = sorted_candidates = OrderedDict(
+        sorted(results_dict.items(), key=lambda t: float(t[1][importe_destino_id]), reverse=True))
+    results = list(ordered_results.values())[:last_mostrar]
+
     return render_template('query3_result.html', **locals())
 
 if __name__ == "__main__":

@@ -56,63 +56,70 @@ class CassandraLogic:
                           + "competidor text, " \
 
         self.tables = {
-            "ciudad_query": Table.ciudad(self.attributes),
-            "ciudad_competidor_query": Table.ciudad_competidor(self.attributes),
-            "ciudad_ts_importe_query": Table.ciudad_ts_importe(self.attributes),
-            "ciudad_importe_ts_query": Table.ciudad_importe_ts(self.attributes),
-            "ciudad_competidor_ts_importe_query": Table.ciudad_competidor_ts_importe(self.attributes),
-            "ciudad_competidor_importe_ts_query": Table.ciudad_competidor_importe_ts(self.attributes),
-            "ciudad_importe_nominal_ts_query": Table.ciudad_importe_nominal_ts(self.attributes),
-            "ciudad_ts_importe_nominal_query": Table.ciudad_ts_importe_nominal(self.attributes),
-            "ciudad_importes_ts_query": Table.ciudad_importes_ts(self.attributes),
-            "ciudad_fecha_importe_nominal_query": Table.ciudad_fecha_importe_nominal(self.attributes),
-            "ciudad_fecha_importe_destino_query": Table.ciudad_fecha_importe_destino(self.attributes),
-            "ciudad_competidor_importe_nominal_ts_query": Table.ciudad_competidor_importe_nominal_ts(self.attributes),
-            "ciudad_competidor_importes_ts_query": Table.ciudad_competidor_importes_ts(self.attributes),
-            "ciudad_competidor_ts_importe_nominal_query": Table.ciudad_competidor_ts_importe_nominal(self.attributes),
-            "ciudad_competidor_fecha_importe_nominal_query": Table.ciudad_competidor_fecha_importe_nominal(self.attributes),
-            "ciudad_competidor_fecha_importe_destino_query": Table.ciudad_competidor_fecha_importe_destino(self.attributes),
+            # "ciudad_query": Table.ciudad(self.attributes),
+            # "ciudad_competidor_query": Table.ciudad_competidor(self.attributes),
+            # "ciudad_ts_importe_query": Table.ciudad_ts_importe(self.attributes),
+            # "ciudad_importe_ts_query": Table.ciudad_importe_ts(self.attributes),
+            # "ciudad_competidor_ts_importe_query": Table.ciudad_competidor_ts_importe(self.attributes),
+            # "ciudad_competidor_importe_ts_query": Table.ciudad_competidor_importe_ts(self.attributes),
+            # "ciudad_importe_nominal_ts_query": Table.ciudad_importe_nominal_ts(self.attributes),
+            # "ciudad_ts_importe_nominal_query": Table.ciudad_ts_importe_nominal(self.attributes),
+            # "ciudad_importes_ts_query": Table.ciudad_importes_ts(self.attributes),
+            # "ciudad_fecha_importe_nominal_query": Table.ciudad_fecha_importe_nominal(self.attributes),
+            # "ciudad_fecha_importe_destino_query": Table.ciudad_fecha_importe_destino(self.attributes),
+            # "ciudad_competidor_importe_nominal_ts_query": Table.ciudad_competidor_importe_nominal_ts(self.attributes),
+            # "ciudad_competidor_importes_ts_query": Table.ciudad_competidor_importes_ts(self.attributes),
+            # "ciudad_competidor_ts_importe_nominal_query": Table.ciudad_competidor_ts_importe_nominal(self.attributes),
+            # "ciudad_competidor_fecha_importe_nominal_query": Table.ciudad_competidor_fecha_importe_nominal(self.attributes),
+            # "ciudad_competidor_fecha_importe_destino_query": Table.ciudad_competidor_fecha_importe_destino(self.attributes),
+            # "agente_query": Table.agente(self.attributes),
+            # "agente_competidor_query": Table.agente_competidor(self.attributes),
+            # "agente_ts_importe_query": Table.agente_ts_importe(self.attributes),
+            # "agente_importe_ts_query": Table.agente_importe_ts(self.attributes),
+            # "agente_competidor_ts_importe_query": Table.agente_competidor_ts_importe(self.attributes),
+            # "agente_competidor_importe_ts_query": Table.agente_competidor_importe_ts(self.attributes),
+            # "agente_importe_nominal_ts_query": Table.agente_importe_nominal_ts(self.attributes),
+            # "agente_ts_importe_nominal_query": Table.agente_ts_importe_nominal(self.attributes),
+            # "agente_importes_ts_query": Table.agente_importes_ts(
+            #     self.attributes),
+            # "agente_fecha_importe_nominal_query": Table.agente_fecha_importe_nominal(self.attributes),
+            # "agente_fecha_importe_destino_query": Table.agente_fecha_importe_destino(self.attributes),
+            # "agente_competidor_importe_nominal_ts_query": Table.agente_competidor_importe_nominal_ts(
+            #     self.attributes),
+            # "agente_competidor_importes_ts_query": Table.agente_competidor_importes_ts(self.attributes),
+            # "agente_competidor_ts_importe_nominal_query": Table.agente_competidor_ts_importe_nominal(
+            #     self.attributes),
+            # "agente_competidor_fecha_importe_nominal_query": Table.agente_competidor_fecha_importe_nominal(
+            #     self.attributes),
+            # "agente_competidor_fecha_importe_destino_query": Table.agente_competidor_fecha_importe_destino(
+            #     self.attributes),
+            # "geohash_scheme": Table.geohash_scheme(self.attributes_scheme),
+            # "geohash_competidor_scheme": Table.geohash_competidor_scheme(self.attributes_scheme),
+            # "geohash_query": Table.geohash(self.attributes),
+            # "geohash_competidor_query": Table.geohash_competidor(self.attributes),
+            # "geohash_ts_importe_query": Table.geohash_ts_importe(self.attributes),
+            # "geohash_importe_ts_query": Table.geohash_importe_ts(self.attributes),
+            # "geohash_competidor_ts_importe_query": Table.geohash_competidor_ts_importe(self.attributes),
+            # "geohash_competidor_importe_ts_query": Table.geohash_competidor_importe_ts(self.attributes),
+            # "geohash_importe_nominal_ts_query": Table.geohash_importe_nominal_ts(self.attributes),
+            # "geohash_ts_importe_nominal_query": Table.geohash_ts_importe_nominal(self.attributes),
+            # "geohash_importes_ts_query": Table.geohash_importes_ts(self.attributes),
+            # "geohash_fecha_importe_nominal_query": Table.geohash_fecha_importe_nominal(self.attributes),
+            # "geohash_fecha_importe_destino_query": Table.geohash_fecha_importe_destino(self.attributes),
+            # "geohash_competidor_importe_nominal_ts_query": Table.geohash_competidor_importe_nominal_ts(self.attributes),
+            # "geohash_competidor_importes_ts_query": Table.geohash_competidor_importes_ts(self.attributes),
+            # "geohash_competidor_ts_importe_nominal_query": Table.geohash_competidor_ts_importe_nominal(self.attributes),
+            # "geohash_competidor_fecha_importe_nominal_query": Table.geohash_competidor_fecha_importe_nominal(
+            #     self.attributes),
+            # "geohash_competidor_fecha_importe_destino_query": Table.geohash_competidor_fecha_importe_destino(
+            #     self.attributes),
+
+            # NEW #
             "agente_query": Table.agente(self.attributes),
             "agente_competidor_query": Table.agente_competidor(self.attributes),
-            "agente_ts_importe_query": Table.agente_ts_importe(self.attributes),
-            "agente_importe_ts_query": Table.agente_importe_ts(self.attributes),
-            "agente_competidor_ts_importe_query": Table.agente_competidor_ts_importe(self.attributes),
-            "agente_competidor_importe_ts_query": Table.agente_competidor_importe_ts(self.attributes),
-            "agente_importe_nominal_ts_query": Table.agente_importe_nominal_ts(self.attributes),
-            "agente_ts_importe_nominal_query": Table.agente_ts_importe_nominal(self.attributes),
-            "agente_importes_ts_query": Table.agente_importes_ts(
-                self.attributes),
-            "agente_fecha_importe_nominal_query": Table.agente_fecha_importe_nominal(self.attributes),
-            "agente_fecha_importe_destino_query": Table.agente_fecha_importe_destino(self.attributes),
-            "agente_competidor_importe_nominal_ts_query": Table.agente_competidor_importe_nominal_ts(
-                self.attributes),
-            "agente_competidor_importes_ts_query": Table.agente_competidor_importes_ts(self.attributes),
-            "agente_competidor_ts_importe_nominal_query": Table.agente_competidor_ts_importe_nominal(
-                self.attributes),
-            "agente_competidor_fecha_importe_nominal_query": Table.agente_competidor_fecha_importe_nominal(
-                self.attributes),
-            "agente_competidor_fecha_importe_destino_query": Table.agente_competidor_fecha_importe_destino(
-                self.attributes),
-            "geohash_scheme": Table.geohash_scheme(self.attributes_scheme),
-            "geohash_competidor_scheme": Table.geohash_competidor_scheme(self.attributes_scheme),
-            "geohash_query": Table.geohash(self.attributes),
-            "geohash_competidor_query": Table.geohash_competidor(self.attributes),
-            "geohash_ts_importe_query": Table.geohash_ts_importe(self.attributes),
-            "geohash_importe_ts_query": Table.geohash_importe_ts(self.attributes),
-            "geohash_competidor_ts_importe_query": Table.geohash_competidor_ts_importe(self.attributes),
-            "geohash_competidor_importe_ts_query": Table.geohash_competidor_importe_ts(self.attributes),
-            "geohash_importe_nominal_ts_query": Table.geohash_importe_nominal_ts(self.attributes),
-            "geohash_ts_importe_nominal_query": Table.geohash_ts_importe_nominal(self.attributes),
-            "geohash_importes_ts_query": Table.geohash_importes_ts(self.attributes),
-            "geohash_fecha_importe_nominal_query": Table.geohash_fecha_importe_nominal(self.attributes),
-            "geohash_fecha_importe_destino_query": Table.geohash_fecha_importe_destino(self.attributes),
-            "geohash_competidor_importe_nominal_ts_query": Table.geohash_competidor_importe_nominal_ts(self.attributes),
-            "geohash_competidor_importes_ts_query": Table.geohash_competidor_importes_ts(self.attributes),
-            "geohash_competidor_ts_importe_nominal_query": Table.geohash_competidor_ts_importe_nominal(self.attributes),
-            "geohash_competidor_fecha_importe_nominal_query": Table.geohash_competidor_fecha_importe_nominal(
-                self.attributes),
-            "geohash_competidor_fecha_importe_destino_query": Table.geohash_competidor_fecha_importe_destino(
-                self.attributes),
+            "agente_importe_nominal_query": Table.agente_importe_nominal(self.attributes),
+            "agente_competidor_importe_nominal_query": Table.agente_competidor_importe_nominal(self.attributes),
+
 
           }
 
@@ -301,14 +308,14 @@ class CassandraLogic:
                   day=None,
                   search=None,
                   alt_table=None,
-                  mostrar=10):
+                  mostrar=None):
 
         # If query data is between two timestamps, we need a trick to retrieve the row.
-        if (timestamp or range_importe_nominal) and not importe_destino and not search:
+        if (timestamp) and not importe_destino and not search:
             sel = 'max(importe_destino)'
-        elif timestamp and importe_nominal and search == 'lower':
+        elif search == 'lower':
             sel = 'min(nearest_lower_importe({}, importe_nominal))'.format(importe_nominal)
-        elif timestamp and importe_nominal and search == 'upper':
+        elif search == 'upper':
             sel = 'min(nearest_upper_importe({}, importe_nominal))'.format(importe_nominal)
         else:
             sel = '*'
@@ -345,7 +352,7 @@ class CassandraLogic:
         if range_importe_nominal:
             min_importe = range_importe_nominal[0]
             max_importe = range_importe_nominal[1]
-            query += "AND importe_nominal < {} AND importe_nominal > {} ".format(max_importe, min_importe)
+            query += "AND importe_nominal <= {} AND importe_nominal >= {} ".format(max_importe, min_importe)
 
         if timestamp:
             max_ts = timestamp[0]
@@ -355,9 +362,10 @@ class CassandraLogic:
         elif geohash_range:
             max_geohash = geohash_range[0]
             min_geohash = geohash_range[1]
-            query += "AND geohash < '{}' AND geohash > '{}' ".format(max_geohash, min_geohash)
+            query += "AND geohash <= '{}' AND geohash >= '{}' ".format(max_geohash, min_geohash)
 
-        query += "LIMIT {}".format(mostrar)
+        if mostrar and mostrar != -1:
+            query += "LIMIT {}".format(mostrar)
         results = self.session.execute(query)
 
         rows = []
@@ -395,16 +403,5 @@ class CassandraLogic:
                                   search='best_tasa',
                                   mostrar=10)
 
-        elif range_importe_nominal and not importe_destino and rows:
-            rows = self.best_tasa(alt_table, pais_destino, divisa,
-                                                    ciudad=ciudad,
-                                                    num_agente=num_agente,
-                                                    geohash=geohash,
-                                                    competidor=competidor,
-                                                    importe_destino=rows[0][0],
-                                                    range_importe_nominal=range_importe_nominal,
-                                                    year=year,
-                                                    month=month,
-                                                    day=day,
-                                                    mostrar=10)
+
         return rows

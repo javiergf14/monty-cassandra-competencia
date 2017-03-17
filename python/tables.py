@@ -521,4 +521,43 @@ class Table:
         return table_query
 
 
+    ################## NEW #####################
+
+    # This solves the query: Dime la mejor tasa sin importar el importe nominal (dia especifico o rango de fechas iterando).
+    @staticmethod
+    def agente(attributes):
+        table_name = "agente_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, year, month, day, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, year DESC, month DESC, day DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+    @staticmethod
+    def agente_competidor(attributes):
+        table_name = "agente_competidor_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, year, month, day, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+    # This solves the query: Dime la mejor tasa para un dia especifico y para un importe nominal especifico o rango de importes iterando (dia especifico o rango de fechas iterando).
+    @staticmethod
+    def agente_importe_nominal(attributes):
+        table_name = "agente_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, year, month, day, importe_nominal, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, year DESC, month DESC, day DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
+
+    @staticmethod
+    def agente_competidor_importe_nominal(attributes):
+        table_name = "agente_competidor_importe_nominal_query"
+        table_query = "CREATE TABLE " + table_name + "(" \
+                      + attributes \
+                      + "PRIMARY KEY (pais_destino, num_agente, divisa, competidor, year, month, day, importe_nominal, importe_destino, timestamp) )" \
+                        "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);"
+        return table_query
 
