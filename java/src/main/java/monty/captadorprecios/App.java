@@ -55,11 +55,23 @@ public class App {
       
      // CassandraLogic.dropAndCreateKeySpace();
    //   CassandraLogic.dropAndCreateTables();
-     CassandraLogic.insertIntoAllTables(dataToInsert);
+   //  CassandraLogic.insertIntoAllTables(dataToInsert);
       
       
+      ciudad = null;
+      competidor = null;
+      String distancia = null;
+      numAgente = null;
+      lat = lon = null;
+      String minRangeImporteNominal="20", maxRangeImporteNominal = "400";
+      String maxYear=null, maxMonth=null, maxDay=null, searchFlag = null;
+      importeNominal = null;
+      System.out.println(CassandraLogic.seleccionarMejoresTasas(paisDestino, divisa, competidor, ciudad, numAgente, lat, lon, distancia, importeNominal, minRangeImporteNominal, maxRangeImporteNominal, year, month, day, maxYear, maxMonth, maxDay, searchFlag));
+      lat = "40.418517";
+      lon = "-3.720835";
+      distancia = "100";
       
-
+      System.out.println(CassandraLogic.seleccionarMejoresTasas(paisDestino, divisa, competidor, ciudad, numAgente, lat, lon, distancia, importeNominal, minRangeImporteNominal, maxRangeImporteNominal, year, month, day, maxYear, maxMonth, maxDay, searchFlag));
   //   System.out.println(CassandraLogic.seleccionarMejoresTasasPaisFechaConcreta("Colombia", "Peso", "2017", "3", "13"));
     // System.out.println(cassandra.seleccionarMejoresTasasNumeroAgenteFechaConcretaCompetidor("Colombia", "23", "Peso", "2017", "3", "13", "Monty"));
 //      
@@ -69,10 +81,10 @@ public class App {
 //      System.out.println(cassandra.seleccionarMejoresTasasNumeroAgenteFechaConcretaImporteNominalExactoNoExisteUpper("Colombia", "23", "Peso", "2017", "3", "13", "210"));
 //      
      //System.out.println();
-     System.out.println(CassandraLogic.seleccionarMejoresTasasNumeroAgenteFechaConcretaRangoImporteNominal("Colombia", "23", "Peso", "2017", "3", "13", "190", "210"));
-     System.out.println(CassandraLogic.seleccionarMejoresTasasNumeroAgenteFechaConcretaRangoImporteNominal("Colombia", "23", "Peso", "2017", "3", "13", "190", "210"));
+    // System.out.println(CassandraLogic.seleccionarMejoresTasasNumeroAgenteFechaConcretaRangoImporteNominal("Colombia", "23", "Peso", "2017", "3", "13", "190", "210"));
+   //  System.out.println(CassandraLogic.seleccionarMejoresTasasNumeroAgenteFechaConcretaRangoImporteNominal("Colombia", "23", "Peso", "2017", "3", "13", "190", "210"));
        
-      System.out.println(CassandraLogic.seleccionarMejoresTasasNumeroAgenteRangoFechas("Colombia", "23", "Peso", "2017", "3", "13", "2017", "3", "14"));
+   //   System.out.println(CassandraLogic.seleccionarMejoresTasasNumeroAgenteRangoFechas("Colombia", "23", "Peso", "2017", "3", "13", "2017", "3", "14"));
 //      
 //      System.out.println();
 //      System.out.println(cassandra.seleccionarMejoresTasasNumeroAgenteRangoFechasImporteNominalExacto("Colombia", "23", "Peso", "2017", "3", "13", "2017", "3", "14", "120"));
