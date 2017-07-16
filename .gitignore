@@ -1,5 +1,5 @@
 # Java files.
-target/
+java/target/
 .settings/
 bin/
 
