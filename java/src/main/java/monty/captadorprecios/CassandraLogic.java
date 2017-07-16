@@ -2,7 +2,6 @@ package monty.captadorprecios;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,12 +22,19 @@ import com.datastax.driver.core.exceptions.InvalidQueryException;
 public class CassandraLogic {
 
 	/*
+	 * Cassandra contact point address.
+	 */
+	private static String contactPoint = "127.0.0.1";
+	/*
 	 * Definition of the common attributes of the tables.
 	 * If an attribute is particular of a table (i.e. geohash), define it in the particular table.
 	 */
 	private static String attributes = "pais_destino text, " 
 			+ "ciudad text, "  
-			+ "divisa text, "  
+			+ "divisa text, "
+			+ "year int, "
+			+ "month int, " 
+			+ "day int, "  
 			+ "importe_destino double, "  
 			+ "competidor text, "  
 			+ "comision double, "  
@@ -37,27 +43,12 @@ public class CassandraLogic {
 			+ "lat double, "  
 			+ "lon double, "  
 			+ "num_agente int, "  
-			+ "importe_nominal double, "  
-			+ "day int, "  
-			+ "month int, "  
-			+ "year int, ";
-
-	private static final int importeDestinoIdDefault = 6;
-
+			+ "importe_nominal double, ";
+		
 	/*
-	 * Definition of the String attributes.
-	 * Note: everything that is not a string nor a integer will be a double.
-	 */	
-	private static List<String> stringAttributes = new ArrayList<>(
-			Arrays.asList("pais_destino", "competidor", "divisa", "ciudad", "geohash"));
-
-	/*
-	 * Definition of the Integer attributes.
-	 * Note: everything that is not a string nor a integer will be a double.
+	 * This variable is used to rank the rows by the best "tasa" ("tasa" = tasa_cambio - comision).
 	 */
-	private static List<String> intAttributes = new ArrayList<>(
-			Arrays.asList("num_agente", "day", "month", "year"));
-
+	private static final int importeDestinoIdDefault = 6;
 
 	/*
 	 * Definition of all the tables and their queries.
@@ -73,12 +64,10 @@ public class CassandraLogic {
 		tables.put("pais_importe_nominal_query",  paisImporteNominal());
 		tables.put("pais_competidor_importe_nominal_query",  paisCompetidorImporteNominal());
 
-
 		tables.put("ciudad_query",  ciudad());
 		tables.put("ciudad_competidor_query",  ciudadCompetidor());
 		tables.put("ciudad_importe_nominal_query",  ciudadImporteNominal());
 		tables.put("ciudad_competidor_importe_nominal_query",  ciudadCompetidorImporteNominal());
-
 
 		tables.put("agente_query",  agente());
 		tables.put("agente_competidor_query",  agenteCompetidor());
@@ -122,7 +111,6 @@ public class CassandraLogic {
 		+ "WITH CLUSTERING ORDER BY (divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_destino DESC, timestamp DESC);";
 	}
 
-
 	/*
 	 * Key structure of the table:
 	 * pais_destino, divisa, year, month, day, importe_nominal, importe_destino, timestamp
@@ -165,8 +153,6 @@ public class CassandraLogic {
 		+ "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, year DESC, month DESC, day DESC, importe_destino DESC, timestamp DESC);";
 	}
 
-
-
 	/*
 	 * Key structure of the table:
 	 * pais_destino, ciudad, competidor, divisa, year, month, day, importe_destino, timestamp
@@ -180,7 +166,6 @@ public class CassandraLogic {
 		+ "PRIMARY KEY (pais_destino, ciudad, divisa, competidor, year, month, day, importe_destino, timestamp) )"
 		+ "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_destino DESC, timestamp DESC);";
 	}
-
 
 	/*
 	 * Key structure of the table:
@@ -196,7 +181,6 @@ public class CassandraLogic {
 		+ "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, year DESC, month DESC, day DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);";
 	}
 
-
 	/*
 	 * Key structure of the table:
 	 * pais_destino, ciudad, divisa, competidor, year, month, day, importe_nominal, importe_destino, timestamp
@@ -211,7 +195,6 @@ public class CassandraLogic {
 		+ "WITH CLUSTERING ORDER BY (ciudad DESC, divisa DESC, competidor DESC, year DESC, month DESC, day DESC, importe_nominal DESC, importe_destino DESC, timestamp DESC);";
 	}
 
-
 	/*
 	 * Key structure of the table:
 	 * pais_destino, num_agente, divisa, year, month, day, importe_destino, timestamp
@@ -225,7 +208,6 @@ public class CassandraLogic {
 		+ "PRIMARY KEY (pais_destino, num_agente, divisa, year, month, day, importe_destino, timestamp) )" 
 		+ "WITH CLUSTERING ORDER BY (num_agente DESC, divisa DESC, year DESC, month DESC, day DESC, importe_destino DESC, timestamp DESC);";
 	}
-
 
 	/*
 	 * Key structure of the table:
@@ -365,7 +347,9 @@ public class CassandraLogic {
 	 * @return session object.
 	 */
 	private static Session createConnection(){
-		Cluster cluster = Cluster.builder().addContactPoint("127.0.0.1").withPort(9042).build();
+		Cluster cluster = Cluster.builder()
+				.addContactPoint(contactPoint)
+				.build();
 		return cluster.connect();
 	}
 
@@ -375,7 +359,9 @@ public class CassandraLogic {
 	 * @return session object.
 	 */
 	private static Session connect(){
-		Cluster cluster = Cluster.builder().addContactPoint("127.0.0.1").withPort(9042).build();
+		Cluster cluster = Cluster.builder()
+				.addContactPoint(contactPoint)
+				.build();
 		return cluster.connect("precios_competencia");
 
 	}
@@ -409,7 +395,6 @@ public class CassandraLogic {
 		}
 	}
 
-
 	/* Drop and create tables.
 	 * 
 	 * First it tries to drop the table and then it creates the table.
@@ -436,72 +421,82 @@ public class CassandraLogic {
 	 * 
 	 * Note: we omit the data insertion in the geohash tables if lat and lon are not defined.
 	 * 
-	 * @param data, map with column names as keys and column values as values. 
-	 * 
 	 */
-	public static void insertIntoAllTables(HashMap<String, String> data){
+	public static void insertIntoAllTables(String paisDestino, String divisa, String competidor,
+			String ciudad, Integer numAgente, 
+			Double lat, Double lon,
+			Double tasaCambio, Double comision, Integer importeNominal, Double importeDestino,
+			Double timestamp, Integer year, Integer month, Integer day){
+		
 		Session ses = connect();
 
 		// Map with all the tables names and queries.
 		HashMap<String, String> tables = defineTables();		
-		boolean coordsDefined = data.containsKey("lat") && data.containsKey("lon");
+		boolean coordsDefined = lat != null && lon != null;
 
-		for(String tableName: tables.keySet()){			
+		for(String tableName: tables.keySet()){
+			String geohash = null;
 			if(tableName.startsWith("geohash")){
 				if(coordsDefined){ // if we have lat and lon, insert. Else, pass.
-					data.put("geohash", GeoHash.geoHashStringWithCharacterPrecision(
-							Double.parseDouble(data.get("lat")), 
-							Double.parseDouble(data.get("lon")), 
-							12)); //Generate geohash			
-					insertData(ses, tableName, data);
-					data.remove("geohash");
+					geohash = GeoHash.geoHashStringWithCharacterPrecision(lat, lon, 12); //Generate geohash			
+					insertData(ses, tableName, paisDestino, divisa, competidor, ciudad, numAgente, lat, lon, tasaCambio, comision, importeNominal, importeDestino,
+							timestamp, year, month, day, geohash);					
 				}
 			}
 			else{
-				insertData(ses, tableName, data);
+				insertData(ses, tableName,  paisDestino, divisa, competidor, ciudad, numAgente, lat, lon, tasaCambio, comision, importeNominal, importeDestino,
+						timestamp, year, month, day, geohash);
 			}
 		}
 	}
 
 	/* Insert a row in the table.
-	 * 
-	 * Notice we do not need to include all the column names nor columns values due to the flexible schema.
-	 * The column values are integer by default, except if they are included in the stringList map.
-	 * 
-	 * @param tableName, name of the table.
-	 * @param data, map with column names as keys and column values as values. 
 	 */
-	private static void insertData(Session ses, String tableName, HashMap<String, String> data){
+	private static void insertData(Session ses, String tableName, String paisDestino, String divisa, String competidor,
+			String ciudad, Integer numAgente, 
+			Double lat, Double lon,
+			Double tasaCambio, Double comision, Integer importeNominal, Double importeDestino,
+			Double timestamp, Integer year, Integer month, Integer day, String geohash){
+		
 		boolean insertFlag = true;
-		if(tableName.endsWith("scheme")){ // Only insert information in geohash_X_scheme if it does not already exist (unique geopositions).
+		if(tableName.endsWith("scheme")){ // Only insert information in scheme tables if it does not already exist (unique geopositions).
 			String checkDataQuery = "SELECT geohash FROM "+tableName+" WHERE ";
-			checkDataQuery += "pais_destino='"+data.get("pais_destino")+"'"
-					+" AND divisa='"+data.get("divisa")+"'"
-					+" AND geohash='"+data.get("geohash")+"'"
-					+" AND competidor='"+data.get("competidor")+"'";
+			checkDataQuery += "pais_destino='"+paisDestino+"'"
+					+" AND divisa='"+divisa+"'"
+					+" AND geohash='"+geohash+"'"
+					+" AND competidor='"+competidor+"'";
 
 			insertFlag =  ses.execute(checkDataQuery).one() == null? true: false;
 		}
 
 		if(insertFlag){
 			String query = "INSERT INTO "+tableName+"(";
-			for(String columnName: data.keySet()){
-				query += columnName+",";
+			String columnNamePart= "pais_destino, divisa, competidor, ciudad, num_agente, tasa_cambio, comision, importe_nominal, importe_destino, ";
+			columnNamePart += "timestamp, year, month, day";
+			
+			String columnValuePart = " VALUES(";
+			columnValuePart += "'"+paisDestino+"', "+"'"+divisa+"', "+"'"+competidor+"', "+"'"+ciudad+"', "+String.valueOf(numAgente)+", "+String.valueOf(tasaCambio)+", ";
+			columnValuePart += String.valueOf(comision)+", "+String.valueOf(importeNominal)+", "+String.valueOf(importeDestino)+", "+String.valueOf(timestamp)+", ";
+			columnValuePart += String.valueOf(year)+", "+String.valueOf(month)+", "+String.valueOf(day);
+			
+			if(lat != null){
+				columnNamePart += ", lat";
+				columnValuePart += ", "+String.valueOf(lat);
+				if(lon != null){
+					columnNamePart += ", lon";
+					columnValuePart += ", "+String.valueOf(lon);
+				}
 			}
-			query = query.substring(0, query.length()-1); // Remove last comma.
-			query += ")";
-			query += " VALUES(";
-
-			for(String columnName: data.keySet()){
-				if( stringAttributes.contains(columnName))
-					query += "'"+data.get(columnName)+"'"+",";
-				else if( intAttributes.contains(columnName))
-					query += Integer.parseInt(data.get(columnName))+",";
-				else // We consider the default variables as double.
-					query += Double.parseDouble(data.get(columnName))+",";
+			
+			if(geohash != null){
+				columnNamePart += ", geohash";
+				columnValuePart += ", '"+String.valueOf(geohash)+"'";
 			}
-			query = query.substring(0, query.length()-1);
-			query += ");";	
+			
+			columnNamePart += ")";
+			columnValuePart += ");";
+			
+			query += columnNamePart + columnValuePart;
 			ses.execute(query);
 		}
 	}
@@ -510,7 +505,7 @@ public class CassandraLogic {
 
 	/*
 	 * Hay cuatro tipo de queries dependiendo en que queremos buscar:
-	 * 1. Pais_destino (and anything else)
+	 * 1. Pais_destino 	
 	 * 2. Ciudad
 	 * 3. Num_agente
 	 * 4. Geolocalizacion
@@ -531,14 +526,14 @@ public class CassandraLogic {
 
 
 	public static List<Row> seleccionarMejoresTasas(String paisDestino, String divisa, String competidor,
-			String ciudad, String numAgente, String lat, String lon, String distancia, 
-			String importeNominal, String minRangeImporteNominal, String maxRangeImporteNominal,
-			String year, String month, String day, String maxYear, String maxMonth, String maxDay, String searchFlag)
+			String ciudad, Integer numAgente, Double lat, Double lon, Integer distancia, 
+			Integer importeNominal, Integer minRangeImporteNominal, Integer maxRangeImporteNominal,
+			Integer year, Integer month, Integer day, Integer maxYear, Integer maxMonth, Integer maxDay, String searchFlag)
 			{
 
 		Session ses = connect();
 
-		if(lat != null && lon != null && distancia != null){
+		if(lat != null && lon != null && distancia != null){ // Geolocalizaciones caso.
 			return bestTasasGeolocalizacion(ses, paisDestino, divisa, competidor,
 					ciudad, numAgente, lat, lon, distancia, 
 					importeNominal, minRangeImporteNominal, maxRangeImporteNominal,
@@ -555,11 +550,14 @@ public class CassandraLogic {
 			return null;
 		}
 			}
-
-	public static List<Row> getGeolocalizaciones(Session ses, String paisDestino, String lat, String lon, String distancia, String divisa, String competidor){
-		GeoLocation location = GeoLocation.fromDegrees(Double.parseDouble(lat), Double.parseDouble(lon));
+	
+	/*
+	 * Get geolocalizaciones within a distance for a given point (lat, lon).
+	 */
+	private static List<Row> getGeolocalizaciones(Session ses, String paisDestino, Double lat, Double lon, Integer distancia, String divisa, String competidor){
+		GeoLocation location = GeoLocation.fromDegrees(lat, lon);
 		GeoLocation[] boundingCoordinates =
-				location.boundingCoordinates(Double.parseDouble(distancia));
+				location.boundingCoordinates(distancia);
 
 		Double minLat = boundingCoordinates[0].getLatitudeInDegrees();
 		Double minLon = boundingCoordinates[0].getLongitudeInDegrees();
@@ -583,10 +581,13 @@ public class CassandraLogic {
 				null);
 	}
 
-	public static List<Row> bestTasasGeolocalizacion(Session ses, String paisDestino, String divisa, String competidor,
-			String ciudad, String numAgente, String lat, String lon, String distancia, 
-			String importeNominal, String minRangeImporteNominal, String maxRangeImporteNominal,
-			String year, String month, String day, String maxYear, String maxMonth, String maxDay, String searchFlag){
+	/*
+	 * Get best tasas for a set of given geolocalizaciones.
+	 */
+	private static List<Row> bestTasasGeolocalizacion(Session ses, String paisDestino, String divisa, String competidor,
+			String ciudad, Integer numAgente, Double lat, Double lon, Integer distancia, 
+			Integer importeNominal, Integer minRangeImporteNominal, Integer maxRangeImporteNominal,
+			Integer year, Integer month, Integer day, Integer maxYear, Integer maxMonth, Integer maxDay, String searchFlag){
 
 		List<Row> geolocalizaciones = getGeolocalizaciones(ses, paisDestino, lat, lon, distancia, divisa, competidor);
 
@@ -628,9 +629,9 @@ public class CassandraLogic {
 	 * @return list of rows with the matches.
 	 */
 	private static List<Row> bestTasas(Session ses, String paisDestino, String divisa, String competidor,
-			String ciudad, String numAgente, String geohash,
-			String importeNominal, String minRangeImporteNominal, String maxRangeImporteNominal,
-			String year, String month, String day, String maxYear, String maxMonth, String maxDay,
+			String ciudad, Integer numAgente, String geohash,
+			Integer importeNominal, Integer minRangeImporteNominal, Integer maxRangeImporteNominal,
+			Integer year, Integer month, Integer day, Integer maxYear, Integer maxMonth, Integer maxDay,
 			String minGeohash, String maxGeohash,
 			String searchFlag){
 
@@ -638,7 +639,7 @@ public class CassandraLogic {
 		String keyField = "";
 		String competidorField = "";
 		int parameterVariation = 0;
-		boolean pleaseSort = false;
+		boolean pleaseSort = true;
 
 		if(ciudad != null){
 			keyField = "ciudad_";
@@ -648,7 +649,7 @@ public class CassandraLogic {
 		}
 		else if(geohash != null){
 			keyField = "geohash_";
-			pleaseSort = true;
+			pleaseSort = false;
 		}
 		else{
 			keyField = "pais_";
@@ -668,13 +669,13 @@ public class CassandraLogic {
 		tableName += "query";		
 
 		// Start date in string format.
-		String s = year+"-"+month+"-"+day;
+		String s = String.valueOf(year)+"-"+String.valueOf(month)+"-"+String.valueOf(day);
 
 		// End date in string format.
 		String e = s;
 
 		if(maxYear != null && maxMonth != null && maxDay != null){// If end date is defined, change end date.
-			e = maxYear+"-"+maxMonth+"-"+maxDay;
+			e = String.valueOf(maxYear)+"-"+String.valueOf(maxMonth)+"-"+String.valueOf(maxDay);
 		}
 
 		// Calculate number of days between start date and end date.
@@ -686,9 +687,9 @@ public class CassandraLogic {
 		ArrayList<Row> toReturn = new ArrayList<Row>();
 		for (int i=0; i <= days; i++) {
 			LocalDate d = startDate.withFieldAdded(DurationFieldType.days(), i);
-			String year2 = d.year().getAsString();
-			String month2 = d.monthOfYear().getAsString();
-			String day2 = d.dayOfMonth().getAsString();	
+			Integer year2 = Integer.valueOf(d.year().getAsString());
+			Integer month2 = Integer.valueOf(d.monthOfYear().getAsString());
+			Integer day2 = Integer.valueOf(d.dayOfMonth().getAsString());	
 
 
 			toReturn.addAll(bestTasaGivenDate(ses, tableName, paisDestino, divisa, competidor,
@@ -718,18 +719,18 @@ public class CassandraLogic {
 	 * @return list of rows with the matches.
 	 */
 	private static List<Row> bestTasaGivenDate(Session ses, String tableName, String paisDestino, String divisa, String competidor,
-			String ciudad, String numAgente, String geohash,
-			String importeNominal, String minRangeImporteNominal, String maxRangeImporteNominal,
-			String year, String month, String day, String maxYear, String maxMonth, String maxDay,
+			String ciudad, Integer numAgente, String geohash,
+			Integer importeNominal, Integer minRangeImporteNominal, Integer maxRangeImporteNominal,
+			Integer year, Integer month, Integer day, Integer maxYear, Integer maxMonth, Integer maxDay,
 			String minGeohash, String maxGeohash,
 			String searchFlag){
 
 		String sel = "* ";
 		if(searchFlag != null && searchFlag.equals("lower")){
-			sel = "min(nearest_lower_importe("+importeNominal+", importe_nominal))";
+			sel = "min(nearest_lower_importe("+String.valueOf(importeNominal)+", importe_nominal))";
 		}
 		else if(searchFlag != null && searchFlag.equals("upper")){
-			sel = "min(nearest_upper_importe("+importeNominal+", importe_nominal))";
+			sel = "min(nearest_upper_importe("+String.valueOf(importeNominal)+", importe_nominal))";
 		}
 		else if(maxGeohash != null && minGeohash != null){
 			sel = "geohash ";
@@ -742,7 +743,7 @@ public class CassandraLogic {
 			query += "AND ciudad='"+ciudad+"' ";
 		}
 		else if(numAgente != null){
-			query += "AND num_agente="+numAgente+" ";
+			query += "AND num_agente="+String.valueOf(numAgente)+" ";
 		}
 		else if(geohash != null){
 			query += "AND geohash='"+geohash+"' ";
@@ -755,22 +756,20 @@ public class CassandraLogic {
 		}
 
 		if(year != null & month != null & day != null){
-			query += "AND year="+year+" AND month="+month+" AND day="+day+" ";
+			query += "AND year="+String.valueOf(year)+" AND month="+String.valueOf(month)+" AND day="+String.valueOf(day)+" ";
 		}
 
 		if(importeNominal != null && searchFlag == null){
-			query += "AND importe_nominal="+importeNominal+" ";
+			query += "AND importe_nominal="+String.valueOf(importeNominal)+" ";
 		}
 
 		if(minRangeImporteNominal != null && maxRangeImporteNominal != null){
-			query += "AND importe_nominal >= "+minRangeImporteNominal+" AND importe_nominal <= "+maxRangeImporteNominal+" ";
+			query += "AND importe_nominal >= "+String.valueOf(minRangeImporteNominal)+" AND importe_nominal <= "+String.valueOf(maxRangeImporteNominal)+" ";
 		}
 
 		if(maxGeohash != null && minGeohash != null){
 			query += "AND geohash <= '"+maxGeohash+"' AND geohash >= '"+minGeohash+"' ";
 		}
-		
-		System.out.println(query);
 
 		ResultSet results = ses.execute(query);
 		return results.all();
